@@ -537,17 +537,15 @@ create policy "public_all" on hfc_extractions
 
 <script>
 /* ════════════════════════════════════════════════
-   ▼▼▼  OWNER CONFIGURATION — FILL THESE IN ONCE  ▼▼▼
-   After filling, commit index.html to GitHub.
-   Everyone who opens the URL uses these keys automatically.
-   No one else ever needs to enter anything.
+   SUPABASE — these are safe to commit publicly
+   Claude API key is stored in Supabase config table
+   and fetched at runtime — never in this file
    ════════════════════════════════════════════════ */
 const CONFIG = {
-  CLAUDE_KEY:    "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",   // Injected by GitHub Actions — do not edit
-  SUPABASE_URL:  "https://ftojirkyfrzcddwzazmm.supabase.co",   // https://xxxx.supabase.co
-  SUPABASE_KEY:  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0b2ppcmt5ZnJ6Y2Rkd3phem1tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4ODc4NDQsImV4cCI6MjA4ODQ2Mzg0NH0.uiC357NueJGHswVwK7uub3EZ7nzYqdB95Z0SS9it9ig",   // eyJhbGciOiJIUzI1NiI...  (anon public key)
+  CLAUDE_KEY:    "",  // fetched from Supabase at startup — do not fill this
+  SUPABASE_URL:  "https://ftojirkyfrzcddwzazmm.supabase.co",
+  SUPABASE_KEY:  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0b2ppcmt5ZnJ6Y2Rkd3phem1tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4ODc4NDQsImV4cCI6MjA4ODQ2Mzg0NH0.uiC357NueJGHswVwK7uub3EZ7nzYqdB95Z0SS9it9ig",
 };
-/* ▲▲▲  END OWNER CONFIGURATION  ▲▲▲ */
 
 /* ════════════════════════════════════════════════
    FIELD DEFINITIONS — 48 HFC KPIs
@@ -669,9 +667,9 @@ const DEMO_EXTRACTIONS = buildDemoExtractions();
    ════════════════════════════════════════════════ */
 const LS_KEY = "hfc_v5_ext";
 const S = {
-  apiKey: CONFIG.CLAUDE_KEY  || localStorage.getItem("hfc_ak")  || "",
-  sbUrl:  CONFIG.SUPABASE_URL|| localStorage.getItem("hfc_sb_url") || "",
-  sbKey:  CONFIG.SUPABASE_KEY|| localStorage.getItem("hfc_sb_key") || "",
+  apiKey: localStorage.getItem("hfc_ak") || "",
+  sbUrl:  CONFIG.SUPABASE_URL || localStorage.getItem("hfc_sb_url") || "",
+  sbKey:  CONFIG.SUPABASE_KEY || localStorage.getItem("hfc_sb_key") || "",
   extractions:[],
   selFields: FIELDS.map(f=>f.k),
   view:"dashboard",resIdx:0,
@@ -731,13 +729,11 @@ function renderDash(){
   const tok=ex.reduce((s,e)=>s+(e.tokens||0),0);
   $("SD_DOCS").textContent=ex.length||"—";$("SD_COS").textContent=cos||"—";$("SD_PER").textContent=pers||"—";$("SD_PTS").textContent=pts||"—";
   $("SD_COST").textContent=ex.length?"₹"+(tok/1000*0.015*85).toFixed(1):"₹0";
-  const configured = CONFIG.CLAUDE_KEY && CONFIG.SUPABASE_URL && CONFIG.SUPABASE_KEY;
-  $("D_DEMO_ALERT").style.display = (S.apiKey || configured) ? "none" : "flex";
-  $("TB_SUB").textContent = configured
-    ? (S.sbConnected ? "🔄 Team sync active — all data shared" : "🔄 Connecting to shared database…")
-    : S.apiKey ? (S.sbConnected ? "🔄 Team sync active" : "💾 Local only") : "Demo mode — add API key";
-  $("KEY_BTN").textContent=S.apiKey?"⚙ Settings":"+ API Key";
-  $("KEY_BTN").style.display = configured ? "none" : "";
+  $("D_DEMO_ALERT").style.display = S.apiKey ? "none" : "flex";
+  $("TB_SUB").textContent = S.apiKey
+    ? (S.sbConnected ? "🔄 Team sync active — all data shared" : "🔄 Connecting…")
+    : "Demo mode";
+  $("KEY_BTN").style.display = S.apiKey ? "none" : "";
   const tbody=$("D_TBODY");tbody.innerHTML="";
   ex.slice(0,10).forEach(e=>{
     const f=e.data?.fields||{};
@@ -1039,7 +1035,7 @@ function exportCSV(exts){
    SETTINGS
    ════════════════════════════════════════════════ */
 function renderSettings(){
-  const configured = CONFIG.CLAUDE_KEY && CONFIG.SUPABASE_URL && CONFIG.SUPABASE_KEY;
+  const configured = S.apiKey && S.sbUrl && S.sbKey;
   if(configured){
     // Show read-only configured state — no inputs needed
     const keyCard = $("SETTINGS_KEY_BODY");
@@ -1131,18 +1127,40 @@ $("CLEAR_ALL").onclick=()=>{if(confirm("Clear all local extraction data? Cannot 
 document.addEventListener("keydown",e=>{if(e.altKey){if(e.key==="u")go("upload");if(e.key==="c")go("compare");if(e.key==="r")go("results");if(e.key==="t")go("trends");}});
 
 /* ════════════════════════════════════════════════
-   INIT
+   INIT — fetches Claude key from Supabase config table
+   so the key is never stored in this HTML file
    ════════════════════════════════════════════════ */
-(function init(){
-  loadLocal();updateCnt();
-  // If owner has pre-configured keys, skip onboarding for everyone
-  const configured = CONFIG.CLAUDE_KEY && CONFIG.SUPABASE_URL && CONFIG.SUPABASE_KEY;
-  $("OV").style.display = configured ? "none" : (S.apiKey ? "none" : (localStorage.getItem("hfc_seen") ? "none" : "flex"));
-  renderDash();renderPicker();
-  $("SEL_CNT").textContent=S.selFields.length+" selected";
-  $("U_NOTE").textContent=S.apiKey?"🤖 claude-opus-4-5 · ~₹2–10 per PDF":"⚡ Demo mode — add API key in Settings";
-  $("KEY_BTN").style.display = configured ? "none" : "";
-  if(S.sbUrl&&S.sbKey){updateSyncUI("Connecting…","off");sbLoadAll();}else updateSyncUI("Local only","off");
+async function fetchClaudeKeyFromSupabase(){
+  if(!S.sbUrl||!S.sbKey) return null;
+  try{
+    const r = await fetch(S.sbUrl+"/rest/v1/hfc_config?key=eq.claude_api_key&select=value&limit=1",{
+      headers:{apikey:S.sbKey, Authorization:"Bearer "+S.sbKey}
+    });
+    if(!r.ok) return null;
+    const rows = await r.json();
+    return rows?.[0]?.value || null;
+  }catch(e){ return null; }
+}
+
+(async function init(){
+  loadLocal(); updateCnt();
+  // Fetch Claude key from Supabase — never stored in HTML
+  if(S.sbUrl && S.sbKey){
+    updateSyncUI("Connecting…","off");
+    const remoteKey = await fetchClaudeKeyFromSupabase();
+    if(remoteKey){
+      S.apiKey = remoteKey;
+      localStorage.setItem("hfc_ak", remoteKey);
+    }
+    sbLoadAll();
+  }
+  // Skip onboarding if we have the key (from Supabase or localStorage)
+  $("OV").style.display = S.apiKey ? "none" : (localStorage.getItem("hfc_seen") ? "none" : "flex");
+  $("KEY_BTN").style.display = S.apiKey ? "none" : "";
+  renderDash(); renderPicker();
+  $("SEL_CNT").textContent = S.selFields.length+" selected";
+  $("U_NOTE").textContent = S.apiKey ? "🤖 claude-opus-4-5 · ~₹2–10 per PDF" : "⚡ Demo mode";
+  if(!S.sbUrl||!S.sbKey) updateSyncUI("Local only","off");
 })();
 </script>
 </body>
