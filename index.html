@@ -685,7 +685,7 @@ function saveLocal(){try{localStorage.setItem(LS_KEY,JSON.stringify(S.extraction
    SUPABASE
    ════════════════════════════════════════════════ */
 async function sbFetch(path,opts={}){
-  const r=await fetch(S.sbUrl+"/rest/v1"+path,{...opts,headers:{...{Content-Type:"application/json",apikey:S.sbKey,Authorization:"Bearer "+S.sbKey},...(opts.headers||{})}});return r;}
+  const r=await fetch(S.sbUrl+"/rest/v1"+path,{...opts,headers:{...{"Content-Type":"application/json",apikey:S.sbKey,Authorization:"Bearer "+S.sbKey},...(opts.headers||{})}});return r;}
 async function sbLoadAll(){if(!S.sbUrl||!S.sbKey)return;try{const r=await sbFetch("/hfc_extractions?order=created_at.desc");if(!r.ok)return;const rows=await r.json();if(Array.isArray(rows)&&rows.length){S.extractions=rows;saveLocal();}S.sbConnected=true;updateSyncUI("Connected","ok");}catch(e){updateSyncUI("Connection failed","err");}}
 async function sbInsert(ext){if(!S.sbUrl||!S.sbKey)return;try{const row={id:ext.id,company:ext.company,period:ext.period,doc_type:ext.doc_type,file_name:ext.file_name,tokens:ext.tokens,is_demo:ext.is_demo,notes:ext.notes||"",data:ext.data};const r=await sbFetch("/hfc_extractions",{method:"POST",headers:{Prefer:"return=minimal"},body:JSON.stringify(row)});toast(r.ok?"✓ Synced to Supabase":"⚠ Sync failed");}catch(e){toast("⚠ Sync error");}}
 async function sbDelete(id){if(!S.sbUrl||!S.sbKey)return;try{await sbFetch(`/hfc_extractions?id=eq.${id}`,{method:"DELETE"});}catch(e){}}
