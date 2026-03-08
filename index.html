@@ -307,14 +307,21 @@ code{font-family:var(--mono);font-size:10.5px;background:var(--bg4);color:var(--
       <div class="sb-sep">Platform</div>
       <button class="nb on" data-v="dashboard"><span class="nb-ic">◉</span> Dashboard</button>
       <button class="nb" data-v="upload"><span class="nb-ic">↑</span> Upload & Extract</button>
+      <button class="nb" data-v="uploadkpi"><span class="nb-ic">✎</span> Manual KPI Entry</button>
       <button class="nb" data-v="results"><span class="nb-ic">≡</span> Extracted Data <span class="nc" id="EXT_CNT" style="display:none">0</span></button>
       <button class="nb" data-v="compare"><span class="nb-ic">⊞</span> Compare</button>
       <button class="nb" data-v="trends"><span class="nb-ic">↗</span> Trends</button>
+      <button class="nb" data-v="ask"><span class="nb-ic">💬</span> Ask Your Data</button>
+      <button class="nb" data-v="mycompany"><span class="nb-ic">🏢</span> My Company vs Peers</button>
+      <button class="nb" data-v="alerts"><span class="nb-ic">🚨</span> Red Flag Alerts</button>
+      <button class="nb" data-v="concall"><span class="nb-ic">🎙</span> Concall Highlights</button>
+      <button class="nb" data-v="score"><span class="nb-ic">🎯</span> Positioning Score</button>
+      <button class="nb" data-v="boardpack"><span class="nb-ic">📋</span> Board Pack</button>
       <div class="sb-sep">Config</div>
       <button class="nb" data-v="settings"><span class="nb-ic">⚙</span> Settings & Sync</button>
       <button class="nb" data-v="guide"><span class="nb-ic">?</span> Guide</button>
     </nav>
-    <div class="sb-foot"><span>claude-opus-4-5 · 48 KPIs</span><br/><span id="SB_SYNC"><span class="sync-dot sync-off"></span>Local only</span></div>
+    <div class="sb-foot"><span>claude-sonnet-4-5 · 48 KPIs</span><br/><span id="SB_SYNC"><span class="sync-dot sync-off"></span>Local only</span></div>
   </aside>
 
   <div class="main">
@@ -344,7 +351,6 @@ code{font-family:var(--mono);font-size:10.5px;background:var(--bg4);color:var(--
         <div class="stat"><div class="sl">Companies</div><div class="sv" id="SD_COS">—</div><div class="ss">tracked</div></div>
         <div class="stat"><div class="sl">Periods</div><div class="sv" id="SD_PER">—</div><div class="ss">quarters tracked</div></div>
         <div class="stat"><div class="sl">Data Points</div><div class="sv" id="SD_PTS">—</div><div class="ss">extracted</div></div>
-        <div class="stat"><div class="sl">API Cost</div><div class="sv" id="SD_COST">₹0</div><div class="ss">est. this session</div></div>
       </div>
       <div class="alert ai" id="D_DEMO_ALERT" style="display:none"><span>ℹ</span><span>Demo mode — add Claude API key in Settings. Free key at <strong>console.anthropic.com</strong></span></div>
       <div class="card hidden" id="D_TABLE">
@@ -357,8 +363,46 @@ code{font-family:var(--mono);font-size:10.5px;background:var(--bg4);color:var(--
     <!-- ═══ UPLOAD ═══ -->
     <div class="page fu hidden" id="P_upload">
       <div id="U_ALERT"></div>
-      <div class="card">
-        <div class="card-hd"><div class="card-t">Upload Competitor PDF</div><span class="bdg bgold">Digital + Scanned</span></div>
+
+      <!-- STEP 1 -->
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <div style="width:26px;height:26px;border-radius:50%;background:var(--gold);color:#08091A;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">1</div>
+        <div style="font-size:13px;font-weight:600;color:var(--cream)">Document Details</div>
+      </div>
+      <div class="card" style="margin-bottom:20px">
+        <div class="card-bd">
+          <div class="frow">
+            <div class="fg"><label class="fl">Competitor Company *</label><input class="fi" id="INP_CO" placeholder="e.g. Aavas, Can Fin, PNB Housing, LIC HFL"/></div>
+            <div class="fg"><label class="fl">Document Type</label><select class="fi" id="INP_DT" onchange="autoSelectModel()"><option value="investor_presentation">Investor Presentation</option><option value="quarterly_results">Quarterly Financial Results</option><option value="annual_report">Annual Report</option><option value="credit_rating">Credit Rating Report</option><option value="concall_transcript">Concall Transcript</option></select></div>
+          </div>
+          <div class="frow">
+            <div class="fg">
+              <label class="fl">Reporting Period <span style="text-transform:none;color:var(--bg5);font-weight:400">— auto-detected if blank</span></label>
+              <input class="fi" id="INP_PER" placeholder="e.g. Q3 FY25, H1 FY25, FY2024"/>
+            </div>
+            <div class="fg">
+              <label class="fl">AI Model</label>
+              <select class="fi" id="INP_MODEL" onchange="updateModelHint()">
+                <option value="claude-sonnet-4-5">⚡ Sonnet — Digital PDFs (~₹2–5/doc)</option>
+                <option value="claude-opus-4-5">🔬 Opus — Scanned / Annual reports (~₹15–30/doc)</option>
+              </select>
+              <div id="MODEL_HINT" style="margin-top:5px;font-size:11px;color:var(--green)">⚡ Best for clean digital PDFs — fast and cost-effective</div>
+            </div>
+          </div>
+          <div class="fg" style="margin-bottom:0">
+            <label class="fl">Analyst Notes <span style="text-transform:none;color:var(--bg5);font-weight:400">— optional</span></label>
+            <textarea class="fi fi-ta" id="INP_NOTES" placeholder="e.g. Management guided 18-20% AUM growth; watch NIM compression in H2…" style="min-height:56px"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 2 -->
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <div style="width:26px;height:26px;border-radius:50%;background:var(--gold);color:#08091A;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">2</div>
+        <div style="font-size:13px;font-weight:600;color:var(--cream)">Upload PDF</div>
+        <span class="bdg bgold" style="margin-left:4px">Digital + Scanned</span>
+      </div>
+      <div class="card" style="margin-bottom:20px">
         <div class="card-bd">
           <div class="dz" id="DZ">
             <input type="file" accept=".pdf" id="FI" multiple/>
@@ -369,26 +413,15 @@ code{font-family:var(--mono);font-size:10.5px;background:var(--bg4);color:var(--
           <div id="FILE_LIST"></div>
         </div>
       </div>
-      <div class="card">
-        <div class="card-hd"><div class="card-t">Document Details</div></div>
-        <div class="card-bd">
-          <div class="frow">
-            <div class="fg"><label class="fl">Competitor Company *</label><input class="fi" id="INP_CO" placeholder="e.g. Aavas, Can Fin, PNB Housing, LIC HFL"/></div>
-            <div class="fg"><label class="fl">Document Type</label><select class="fi" id="INP_DT"><option value="investor_presentation">Investor Presentation</option><option value="quarterly_results">Quarterly Financial Results</option><option value="annual_report">Annual Report</option><option value="credit_rating">Credit Rating Report</option><option value="concall_transcript">Concall Transcript</option></select></div>
-          </div>
-          <div class="fg">
-            <label class="fl">Reporting Period <span style="text-transform:none;color:var(--bg5);font-weight:400">— auto-detected if blank</span></label>
-            <input class="fi" id="INP_PER" placeholder="e.g. Q3 FY25, H1 FY25, FY2024"/>
-          </div>
-          <div class="fg" style="margin-bottom:0">
-            <label class="fl">Analyst Notes <span style="text-transform:none;color:var(--bg5);font-weight:400">— optional, saved with extraction</span></label>
-            <textarea class="fi fi-ta" id="INP_NOTES" placeholder="e.g. Management guided 18-20% AUM growth; watch NIM compression in H2…"></textarea>
-          </div>
-        </div>
+
+      <!-- STEP 3 -->
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <div style="width:26px;height:26px;border-radius:50%;background:var(--gold);color:#08091A;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">3</div>
+        <div style="font-size:13px;font-weight:600;color:var(--cream)">Select KPI Fields</div>
       </div>
-      <div class="card">
+      <div class="card" style="margin-bottom:20px">
         <div class="card-hd">
-          <div class="card-t">KPI Fields to Extract</div>
+          <div class="card-t" style="font-size:12px;color:var(--slate);font-weight:400">Choose which of the 48 KPIs to extract — or keep all selected</div>
           <div style="display:flex;gap:6px;align-items:center">
             <button class="btn ghost sm" id="SEL_ALL">All</button>
             <button class="btn ghost sm" id="SEL_NONE">None</button>
@@ -397,10 +430,104 @@ code{font-family:var(--mono);font-size:10.5px;background:var(--bg4);color:var(--
         </div>
         <div class="card-bd" id="FPICKER"></div>
       </div>
+
+      <!-- EXTRACT -->
       <div style="display:flex;gap:10px;justify-content:flex-end;align-items:center">
         <p style="font-size:12px;color:var(--slate);margin-right:auto;max-width:400px;line-height:1.5" id="U_NOTE"></p>
-        <button class="btn gold" style="padding:10px 24px;font-size:13px" id="EXTRACT_BTN" disabled>🚀 Extract KPIs with Claude</button>
+        <button class="btn gold" style="padding:10px 28px;font-size:13.5px;font-weight:700" id="EXTRACT_BTN" disabled>🚀 Extract KPIs with Claude</button>
       </div>
+    </div>
+
+    <!-- ═══ SUCCESS ═══ -->
+    <div class="page fu hidden" id="P_success">
+      <div class="card" id="SUCCESS_CONTENT"></div>
+    </div>
+
+    <!-- ═══ MANUAL KPI ENTRY ═══ -->
+    <div class="page fu hidden" id="P_uploadkpi">
+      <div style="margin-bottom:18px">
+        <h2 style="font-family:var(--display);font-size:24px;font-weight:600;color:var(--cream);margin-bottom:4px">Manual KPI Entry</h2>
+        <p style="font-size:12.5px;color:var(--slate);max-width:600px">Build your historical repository without PDFs. Enter KPIs directly for any company and period — spreadsheet data, memory, or past reports.</p>
+      </div>
+      <div id="MKE_ALERT"></div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-hd"><div class="card-t">Company & Period</div></div>
+        <div class="card-bd">
+          <div class="frow">
+            <div class="fg"><label class="fl">Company Name *</label><input class="fi" id="MKE_CO" placeholder="e.g. ABHFL, PNB Housing, Tata Capital Housing"/></div>
+            <div class="fg"><label class="fl">Reporting Period *</label><input class="fi" id="MKE_PER" placeholder="e.g. Q2 FY23, H1 FY24, FY2022"/></div>
+          </div>
+          <div class="fg" style="margin-bottom:0">
+            <label class="fl">Document Type</label>
+            <select class="fi" id="MKE_DT">
+              <option value="investor_presentation">Investor Presentation</option>
+              <option value="quarterly_results">Quarterly Financial Results</option>
+              <option value="annual_report">Annual Report</option>
+              <option value="manual_entry">Manual Entry / Repository</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-hd">
+          <div class="card-t">KPI Values</div>
+          <div style="display:flex;gap:6px;align-items:center">
+            <input class="fi" id="MKE_SEARCH" placeholder="Search KPIs…" style="width:160px;padding:5px 10px;font-size:12px"/>
+            <div style="display:flex;gap:4px;flex-wrap:wrap" id="MKE_CAT_FILTERS"></div>
+          </div>
+        </div>
+        <div class="card-bd">
+          <div id="MKE_FIELDS_GRID" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px"></div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-hd"><div class="card-t">📋 Bulk Paste (Optional)</div><span class="bdg bs">CSV format</span></div>
+        <div class="card-bd">
+          <p style="font-size:12px;color:var(--slate);margin-bottom:10px;line-height:1.6">Paste data in <strong style="color:var(--cream)">KPI Name, Value</strong> format (one per line). Claude will match KPI names to the fields automatically.</p>
+          <textarea class="fi fi-ta" id="MKE_PASTE" placeholder="AUM, 18240&#10;NIM, 5.82&#10;GNPA, 1.12&#10;RoA, 3.2&#10;CAR, 38.2" style="min-height:100px;font-family:var(--mono);font-size:12px"></textarea>
+          <button class="btn out sm" style="margin-top:8px" id="MKE_PARSE_BTN">⚡ Parse & Fill Fields</button>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button class="btn out" onclick="clearMKE()">Clear All</button>
+        <button class="btn gold" style="padding:10px 28px" id="MKE_SAVE_BTN">💾 Save to Repository</button>
+      </div>
+    </div>
+
+    <!-- ═══ ASK ═══ -->
+    <div class="page fu hidden" id="P_ask">
+      <div style="margin-bottom:18px">
+        <h2 style="font-family:var(--display);font-size:24px;font-weight:600;color:var(--cream);margin-bottom:4px">Ask Your Data</h2>
+        <p style="font-size:12.5px;color:var(--slate);max-width:560px">Ask any question about your extracted competitor data in plain English. Claude reads all your extractions and answers instantly.</p>
+      </div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-bd">
+          <div style="display:flex;gap:8px;align-items:flex-start">
+            <textarea class="fi fi-ta" id="ASK_INPUT" placeholder="e.g. What was the rank of ABHFL in disbursements in Q2 FY25? Who were the companies above it?&#10;e.g. Which company had the lowest GNPA last quarter?&#10;e.g. Compare NIM trends for Aavas and Can Fin across all periods" style="min-height:80px;flex:1;resize:none"></textarea>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+            <button class="btn gold" id="ASK_BTN" style="padding:9px 22px">Ask Claude →</button>
+            <button class="btn out sm" onclick="askSample(this)" data-q="Which company had the best GNPA in the latest quarter?">Sample: GNPA rank</button>
+            <button class="btn out sm" onclick="askSample(this)" data-q="Rank all companies by AUM for the latest available period">Sample: AUM ranking</button>
+            <button class="btn out sm" onclick="askSample(this)" data-q="Which company had the highest NIM and what was it?">Sample: Best NIM</button>
+            <button class="btn out sm" onclick="askSample(this)" data-q="Show me disbursement trends across all companies and periods">Sample: Disb. trends</button>
+          </div>
+        </div>
+      </div>
+      <div id="ASK_THINKING" class="hidden">
+        <div style="display:flex;align-items:center;gap:10px;padding:16px 20px;background:var(--bg2);border:1px solid var(--edge);border-radius:10px;margin-bottom:14px">
+          <div style="font-size:20px">🤔</div>
+          <div>
+            <div style="font-size:13px;font-weight:500;color:var(--cream)">Claude is analysing your data…</div>
+            <div style="font-size:11px;color:var(--slate);margin-top:2px" id="ASK_STATUS">Reading extractions…</div>
+          </div>
+          <div class="pb-bar" style="flex:1;margin:0 0 0 10px"><div class="pb-f" id="ASK_PROG" style="width:20%"></div></div>
+        </div>
+      </div>
+      <div id="ASK_HISTORY"></div>
     </div>
 
     <!-- ═══ RESULTS ═══ -->
@@ -454,6 +581,147 @@ code{font-family:var(--mono);font-size:10.5px;background:var(--bg4);color:var(--
       <div id="TREND_CONTENT"></div>
     </div>
 
+    <!-- ═══ MY COMPANY VS PEERS ═══ -->
+    <div class="page fu hidden" id="P_mycompany">
+      <div style="margin-bottom:18px">
+        <h2 style="font-family:var(--display);font-size:24px;font-weight:600;color:var(--cream);margin-bottom:4px">My Company vs Peers</h2>
+        <p style="font-size:12.5px;color:var(--slate);max-width:560px">Upload your own quarterly results to see exactly where you stand in the peer group across all 48 KPIs.</p>
+      </div>
+      <div id="MC_ALERT"></div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-hd"><div class="card-t">Upload Your Results</div><span class="bdg bp">Your Company</span></div>
+        <div class="card-bd">
+          <div class="frow" style="margin-bottom:12px">
+            <div class="fg"><label class="fl">Your Company Name *</label><input class="fi" id="MC_CO" placeholder="e.g. Home First Finance, Aptus Value Housing"/></div>
+            <div class="fg"><label class="fl">Reporting Period *</label><input class="fi" id="MC_PER" placeholder="e.g. Q3 FY25"/></div>
+          </div>
+          <div class="dz" id="MC_DZ" style="padding:24px">
+            <input type="file" accept=".pdf" id="MC_FI"/>
+            <div style="font-size:22px;margin-bottom:6px;opacity:.7">📄</div>
+            <div style="font-size:13px;font-weight:600;color:var(--cream);margin-bottom:3px">Drop your results PDF here</div>
+            <div style="font-size:11px;color:var(--slate)">Quarterly results, investor presentation, or annual report</div>
+          </div>
+          <div id="MC_FILE"></div>
+          <div style="margin-top:12px;display:flex;gap:8px;justify-content:flex-end">
+            <button class="btn gold" id="MC_BTN" disabled>🏢 Extract & Compare →</button>
+          </div>
+        </div>
+      </div>
+      <div id="MC_RESULT"></div>
+    </div>
+
+    <!-- ═══ RED FLAG ALERTS ═══ -->
+    <div class="page fu hidden" id="P_alerts">
+      <div style="margin-bottom:18px">
+        <h2 style="font-family:var(--display);font-size:24px;font-weight:600;color:var(--cream);margin-bottom:4px">Red Flag & Green Flag Alerts</h2>
+        <p style="font-size:12.5px;color:var(--slate);max-width:560px">Claude analyses all your extractions and surfaces concerning deteriorations and positive improvements across the peer group.</p>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:16px">
+        <button class="btn gold" id="ALERTS_BTN">🔍 Analyse All Data</button>
+        <button class="btn out sm" id="ALERTS_REFRESH" style="display:none">↻ Refresh</button>
+      </div>
+      <div id="ALERTS_THINKING" class="hidden">
+        <div style="display:flex;align-items:center;gap:10px;padding:16px 20px;background:var(--bg2);border:1px solid var(--edge);border-radius:10px;margin-bottom:14px">
+          <div style="font-size:20px">🔍</div>
+          <div style="flex:1"><div style="font-size:13px;font-weight:500;color:var(--cream)">Scanning for red flags and green flags…</div>
+          <div class="pb-bar" style="margin:8px 0 0"><div class="pb-f" id="ALERTS_PROG" style="width:10%"></div></div></div>
+        </div>
+      </div>
+      <div id="ALERTS_RESULT"></div>
+    </div>
+
+    <!-- ═══ CONCALL HIGHLIGHTS ═══ -->
+    <div class="page fu hidden" id="P_concall">
+      <div style="margin-bottom:18px">
+        <h2 style="font-family:var(--display);font-size:24px;font-weight:600;color:var(--cream);margin-bottom:4px">Concall Highlights Extractor</h2>
+        <p style="font-size:12.5px;color:var(--slate);max-width:560px">Upload any competitor concall transcript or earnings call PDF. Claude extracts management guidance, key quotes, growth outlook, and analyst concerns.</p>
+      </div>
+      <div id="CC_ALERT"></div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-hd"><div class="card-t">Upload Concall Transcript</div><span class="bdg bb">PDF or Text</span></div>
+        <div class="card-bd">
+          <div class="frow" style="margin-bottom:12px">
+            <div class="fg"><label class="fl">Company *</label><input class="fi" id="CC_CO" placeholder="e.g. Aavas Financiers"/></div>
+            <div class="fg"><label class="fl">Period</label><input class="fi" id="CC_PER" placeholder="e.g. Q3 FY25"/></div>
+          </div>
+          <div class="dz" id="CC_DZ" style="padding:24px">
+            <input type="file" accept=".pdf" id="CC_FI"/>
+            <div style="font-size:22px;margin-bottom:6px;opacity:.7">🎙</div>
+            <div style="font-size:13px;font-weight:600;color:var(--cream);margin-bottom:3px">Drop concall transcript PDF here</div>
+            <div style="font-size:11px;color:var(--slate)">Earnings call transcript · Management commentary · Analyst Q&A</div>
+          </div>
+          <div id="CC_FILE"></div>
+          <div style="margin-top:12px;display:flex;gap:8px;justify-content:flex-end">
+            <button class="btn gold" id="CC_BTN" disabled>🎙 Extract Highlights →</button>
+          </div>
+        </div>
+      </div>
+      <div id="CC_RESULT"></div>
+    </div>
+
+    <!-- ═══ POSITIONING SCORE ═══ -->
+    <div class="page fu hidden" id="P_score">
+      <div style="margin-bottom:18px">
+        <h2 style="font-family:var(--display);font-size:24px;font-weight:600;color:var(--cream);margin-bottom:4px">Strategic Positioning Score</h2>
+        <p style="font-size:12.5px;color:var(--slate);max-width:560px">Composite 100-point score per company across 6 strategic dimensions. Instant CEO-level view of peer positioning.</p>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:16px;align-items:center">
+        <div style="font-size:9.5px;color:var(--slate);text-transform:uppercase;letter-spacing:1px;font-weight:600">Period</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap" id="SCORE_PERIODS"></div>
+        <button class="btn gold sm" id="SCORE_BTN" style="margin-left:auto">🎯 Calculate Scores</button>
+      </div>
+      <div id="SCORE_THINKING" class="hidden">
+        <div style="display:flex;align-items:center;gap:10px;padding:16px 20px;background:var(--bg2);border:1px solid var(--edge);border-radius:10px;margin-bottom:14px">
+          <div style="font-size:20px">🎯</div>
+          <div style="flex:1"><div style="font-size:13px;font-weight:500;color:var(--cream)">Claude is scoring all companies…</div>
+          <div class="pb-bar" style="margin:8px 0 0"><div class="pb-f" id="SCORE_PROG" style="width:10%"></div></div></div>
+        </div>
+      </div>
+      <div id="SCORE_RESULT"></div>
+    </div>
+
+    <!-- ═══ BOARD PACK ═══ -->
+    <div class="page fu hidden" id="P_boardpack">
+      <div style="margin-bottom:18px">
+        <h2 style="font-family:var(--display);font-size:24px;font-weight:600;color:var(--cream);margin-bottom:4px">Board Pack Generator</h2>
+        <p style="font-size:12.5px;color:var(--slate);max-width:560px">Generate a ready-to-use competitive intelligence narrative for your board pack. Select period and your company, Claude writes the full commentary.</p>
+      </div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-hd"><div class="card-t">Configure Report</div></div>
+        <div class="card-bd">
+          <div class="frow">
+            <div class="fg">
+              <label class="fl">Your Company Name</label>
+              <input class="fi" id="BP_CO" placeholder="e.g. Home First Finance Company"/>
+            </div>
+            <div class="fg">
+              <label class="fl">Reporting Period</label>
+              <select class="fi" id="BP_PER"><option value="">— Select period —</option></select>
+            </div>
+          </div>
+          <div class="fg">
+            <label class="fl">Tone</label>
+            <select class="fi" id="BP_TONE">
+              <option value="board">Board Pack — formal, third person, concise</option>
+              <option value="management">Management Review — direct, action-oriented</option>
+              <option value="investor">Investor Communication — positive framing, growth focus</option>
+            </select>
+          </div>
+          <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:4px">
+            <button class="btn gold" id="BP_BTN">📋 Generate Board Commentary →</button>
+          </div>
+        </div>
+      </div>
+      <div id="BP_THINKING" class="hidden">
+        <div style="display:flex;align-items:center;gap:10px;padding:16px 20px;background:var(--bg2);border:1px solid var(--edge);border-radius:10px;margin-bottom:14px">
+          <div style="font-size:20px">✍️</div>
+          <div style="flex:1"><div style="font-size:13px;font-weight:500;color:var(--cream)">Claude is writing your board commentary…</div>
+          <div class="pb-bar" style="margin:8px 0 0"><div class="pb-f" id="BP_PROG" style="width:10%"></div></div></div>
+        </div>
+      </div>
+      <div id="BP_RESULT"></div>
+    </div>
+
     <!-- ═══ SETTINGS ═══ -->
     <div class="page fu hidden" id="P_settings">
       <div style="max-width:680px">
@@ -485,6 +753,24 @@ code{font-family:var(--mono);font-size:10.5px;background:var(--bg4);color:var(--
           <div class="card-bd">
             <p style="font-size:12.5px;color:var(--slate);margin-bottom:14px;line-height:1.6">Clear all locally stored data. Does not affect Supabase.</p>
             <button class="btn danger" id="CLEAR_ALL">Clear All Local Data</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><div class="card-t">💰 API Usage</div><span class="bdg bgold" id="USAGE_BADGE">₹0 est.</span></div>
+          <div class="card-bd">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+              <div style="background:var(--bg3);border-radius:8px;padding:14px 16px">
+                <div style="font-size:9.5px;color:var(--slate);text-transform:uppercase;letter-spacing:1px;font-weight:600;margin-bottom:6px">Documents Processed</div>
+                <div style="font-family:var(--mono);font-size:22px;color:var(--cream)" id="USAGE_DOCS">0</div>
+              </div>
+              <div style="background:var(--bg3);border-radius:8px;padding:14px 16px">
+                <div style="font-size:9.5px;color:var(--slate);text-transform:uppercase;letter-spacing:1px;font-weight:600;margin-bottom:6px">Est. Total Cost</div>
+                <div style="font-family:var(--mono);font-size:22px;color:var(--gold)" id="USAGE_COST">₹0</div>
+              </div>
+            </div>
+            <div style="font-size:11px;color:var(--slate);line-height:1.8">
+              Estimate based on ~₹8 avg per document · Actual cost visible at <strong style="color:var(--gold)">console.anthropic.com → Usage</strong>
+            </div>
           </div>
         </div>
       </div>
@@ -695,7 +981,7 @@ function updateSyncUI(text,state){const el=$("SB_SYNC"),sb=$("SB_STATUS");if(el)
 /* ════════════════════════════════════════════════
    NAV
    ════════════════════════════════════════════════ */
-const TITLES={dashboard:"Dashboard",upload:"Upload & Extract",results:"Extracted Data",compare:"Compare Competitors",trends:"Trend Analysis",settings:"Settings & Sync",guide:"Deployment Guide"};
+const TITLES={dashboard:"Dashboard",upload:"Upload & Extract",success:"Extraction Success",uploadkpi:"Manual KPI Entry",results:"Extracted Data",compare:"Compare Competitors",trends:"Trend Analysis",ask:"Ask Your Data",mycompany:"My Company vs Peers",alerts:"Red Flag Alerts",concall:"Concall Highlights",score:"Strategic Positioning Score",boardpack:"Board Pack Generator",settings:"Settings & Sync",guide:"Deployment Guide"};
 function go(v){
   S.view=v;
   document.querySelectorAll(".page").forEach(p=>p.classList.add("hidden"));
@@ -708,6 +994,18 @@ function go(v){
   if(v==="dashboard")renderDash();
   if(v==="settings")renderSettings();
   if(v==="trends")renderTrends();
+  if(v==="ask"){askHistory=[];$("ASK_HISTORY").innerHTML="";$("ASK_INPUT").value="";}
+  if(v==="score")renderScore();
+  if(v==="uploadkpi"){renderMKE();}
+  if(v==="success"){}
+  if(v==="boardpack"){
+    const sel=document.getElementById("BP_PER");
+    const periods=[...new Set(S.extractions.map(e=>e.period).filter(Boolean))].sort((a,b)=>b.localeCompare(a));
+    sel.innerHTML='<option value="">— Select period —</option>'+periods.map(p=>`<option value="${p}">${p}</option>`).join("");
+  }
+  if(v==="alerts"){document.getElementById("ALERTS_RESULT").innerHTML="";}
+  if(v==="mycompany"){document.getElementById("MC_RESULT").innerHTML="";}
+  if(v==="concall"){document.getElementById("CC_RESULT").innerHTML="";}
   closeSidebar();
 }
 function $(id){return document.getElementById(id);}
@@ -728,7 +1026,6 @@ function renderDash(){
   const pts=ex.reduce((s,e)=>s+Object.values(e.data?.fields||{}).filter(f=>f.value!=null).length,0);
   const tok=ex.reduce((s,e)=>s+(e.tokens||0),0);
   $("SD_DOCS").textContent=ex.length||"—";$("SD_COS").textContent=cos||"—";$("SD_PER").textContent=pers||"—";$("SD_PTS").textContent=pts||"—";
-  $("SD_COST").textContent=ex.length?"₹"+(tok/1000*0.015*85).toFixed(1):"₹0";
   $("D_DEMO_ALERT").style.display = S.apiKey ? "none" : "flex";
   $("TB_SUB").textContent = S.apiKey
     ? (S.sbConnected ? "🔄 Team sync active — all data shared" : "🔄 Connecting…")
@@ -794,6 +1091,31 @@ function showProc(msg){$("POV").classList.add("show");setP(5,msg);}
 function hideProc(){$("POV").classList.remove("show");if(pTimer){clearInterval(pTimer);pTimer=null;}}
 function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
 
+function autoSelectModel(){
+  const dt=document.getElementById("INP_DT")?.value;
+  const mm=document.getElementById("INP_MODEL");
+  if(!mm)return;
+  if(dt==="annual_report"||dt==="credit_rating"){
+    mm.value="claude-opus-4-5";
+  } else {
+    mm.value="claude-sonnet-4-5";
+  }
+  updateModelHint();
+}
+
+function updateModelHint(){
+  const m=document.getElementById("INP_MODEL")?.value;
+  const hint=document.getElementById("MODEL_HINT");
+  if(!hint)return;
+  if(m==="claude-opus-4-5"){
+    hint.style.color="var(--amber)";
+    hint.textContent="🔬 Best for scanned/image PDFs & annual reports — higher accuracy, higher cost";
+  } else {
+    hint.style.color="var(--green)";
+    hint.textContent="⚡ Best for clean digital PDFs — fast and cost-effective";
+  }
+}
+
 async function runExtraction(){
   const company=$("INP_CO").value.trim();
   if(!pendingFiles.length){setAlert("U_ALERT","Please upload a PDF first.","ae");return;}
@@ -814,7 +1136,7 @@ async function runExtraction(){
     }
     const b64=await toB64(file);setP(20,"Sending to Claude…");
     let p=22;pTimer=setInterval(()=>{if(p<88)p+=Math.random()*3;const msgs=[[0,"Claude is reading your PDF…"],[40,"Identifying tables…"],[60,"Extracting metrics…"],[78,"Structuring results…"]];const m=msgs.filter(x=>x[0]<=p).pop();setP(p,m?.[1]);},900);
-    const resp=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json","x-api-key":S.apiKey,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify({model:"claude-opus-4-5",max_tokens:8192,messages:[{role:"user",content:[{type:"document",source:{type:"base64",media_type:"application/pdf",data:b64}},{type:"text",text:buildPrompt(activeFields)}]}]})});
+    const resp=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json","x-api-key":S.apiKey,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify({model:(document.getElementById("INP_MODEL")?.value||"claude-sonnet-4-5"),max_tokens:8192,messages:[{role:"user",content:[{type:"document",source:{type:"base64",media_type:"application/pdf",data:b64}},{type:"text",text:buildPrompt(activeFields)}]}]})});
     clearInterval(pTimer);pTimer=null;
     if(!resp.ok){const err=await resp.json().catch(()=>({}));throw new Error(err.error?.message||"API error "+resp.status);}
     setP(96,"Parsing…");const data=await resp.json();
@@ -828,9 +1150,64 @@ function addExt({company,file,data,isDemo,tokens,notes}){
   const ext={id:Date.now().toString(),company:data.company_name||company,period:data.period_detected||$("INP_PER")?.value||"",doc_type:$("INP_DT")?.value||"investor_presentation",file_name:file.name,tokens,is_demo:isDemo,notes:notes||"",created_at:new Date().toISOString(),data};
   S.extractions.unshift(ext);saveLocal();sbInsert(ext);updateCnt();
   pendingFiles=[];$("FILE_LIST").innerHTML="";$("INP_NOTES").value="";
-  const found=Object.values(data.fields||{}).filter(f=>f.value!=null).length;
-  setAlert("U_ALERT",`✓ Extracted <strong>${found}</strong> of ${FIELDS.length} fields — <strong>${ext.company}</strong> · ${ext.period}${isDemo?" (demo)":""}. <button class='btn out xs' style='margin-left:8px' onclick="go('results')">View →</button> <button class='btn out xs' onclick="go('compare')">Compare →</button>`,"ao");
   renderDash();
+  // Navigate to success page
+  showSuccess(ext, data);
+}
+
+function showSuccess(ext, data){
+  const found=Object.values(data.fields||{}).filter(f=>f.value!=null).length;
+  const notFound=FIELDS.length-found;
+  const confHigh=Object.values(data.fields||{}).filter(f=>f.conf==="high").length;
+  const confMed=Object.values(data.fields||{}).filter(f=>f.conf==="medium").length;
+
+  // Pick 6 key KPIs to show as highlights
+  const highlights=["aum","nim","gnpa","roa","car","disbursements"].map(k=>{
+    const f=data.fields?.[k];const field=FIELDS.find(ff=>ff.k===k);
+    return f?.value!=null?{label:field?.l||k,value:f.value,unit:field?.u||"",conf:f.conf}:null;
+  }).filter(Boolean);
+
+  const div=$("SUCCESS_CONTENT");
+  div.innerHTML=`
+    <div style="text-align:center;padding:32px 20px 24px">
+      <div style="font-size:52px;margin-bottom:12px">✅</div>
+      <div style="font-family:var(--display);font-size:26px;font-weight:700;color:var(--cream);margin-bottom:6px">Extraction Complete!</div>
+      <div style="font-size:14px;color:var(--slate)">${ext.company} &nbsp;·&nbsp; ${ext.period||"Period auto-detected"} &nbsp;·&nbsp; ${(ext.doc_type||"").replace(/_/g," ")}</div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:0 20px 20px">
+      <div style="background:var(--bg3);border-radius:10px;padding:16px;text-align:center">
+        <div style="font-size:28px;font-weight:700;font-family:var(--mono);color:var(--green)">${found}</div>
+        <div style="font-size:11px;color:var(--slate);margin-top:3px">Fields Found</div>
+      </div>
+      <div style="background:var(--bg3);border-radius:10px;padding:16px;text-align:center">
+        <div style="font-size:28px;font-weight:700;font-family:var(--mono);color:var(--gold)">${confHigh}</div>
+        <div style="font-size:11px;color:var(--slate);margin-top:3px">High Confidence</div>
+      </div>
+      <div style="background:var(--bg3);border-radius:10px;padding:16px;text-align:center">
+        <div style="font-size:28px;font-weight:700;font-family:var(--mono);color:${notFound>10?"var(--amber)":"var(--slate)"}">${notFound}</div>
+        <div style="font-size:11px;color:var(--slate);margin-top:3px">Not Found</div>
+      </div>
+    </div>
+
+    ${highlights.length?`
+    <div style="padding:0 20px 20px">
+      <div style="font-size:10px;font-weight:700;color:var(--slate);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:10px">Key Metrics Extracted</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+        ${highlights.map(h=>`<div style="background:var(--bg3);border-radius:8px;padding:12px 14px">
+          <div style="font-size:9.5px;color:var(--slate);text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px">${h.label}</div>
+          <div style="font-family:var(--mono);font-size:18px;font-weight:600;color:var(--cream)">${h.value}<span style="font-size:11px;color:var(--slate);margin-left:3px">${h.unit}</span></div>
+          <div style="font-size:9px;margin-top:3px;color:${h.conf==="high"?"var(--green)":h.conf==="medium"?"var(--amber)":"var(--slate)"}">${h.conf||"–"} confidence</div>
+        </div>`).join("")}
+      </div>
+    </div>`:""}
+
+    <div style="padding:0 20px 24px;display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn gold" style="flex:1;min-width:140px" onclick="go('results')">📊 View Full Data →</button>
+      <button class="btn out" style="flex:1;min-width:140px" onclick="go('compare')">⊞ Compare →</button>
+      <button class="btn out" style="flex:1;min-width:140px" onclick="go('upload')">↑ Upload Another</button>
+    </div>`;
+  go("success");
 }
 
 /* ════════════════════════════════════════════════
@@ -1035,6 +1412,13 @@ function exportCSV(exts){
    SETTINGS
    ════════════════════════════════════════════════ */
 function renderSettings(){
+  // Update usage stats
+  const tok = S.extractions.reduce((s,e)=>s+(e.tokens||0),0);
+  const cost = "₹"+(S.extractions.length?(tok/1000*0.015*85).toFixed(1):0);
+  const ub = $("USAGE_BADGE"); if(ub) ub.textContent = cost+" est.";
+  const ud = $("USAGE_DOCS"); if(ud) ud.textContent = S.extractions.filter(e=>!e.is_demo).length;
+  const uc = $("USAGE_COST"); if(uc) uc.textContent = cost;
+
   const configured = S.apiKey && S.sbUrl && S.sbKey;
   if(configured){
     // Show read-only configured state — no inputs needed
@@ -1043,7 +1427,7 @@ function renderSettings(){
     if(keyCard) keyCard.innerHTML = `
       <div class="alert ao"><span>✓</span><span><strong>Pre-configured by administrator.</strong> Claude API key is embedded in the app — no action needed.</span></div>
       <div style="background:var(--bg3);border-radius:8px;padding:14px 16px;font-size:12.5px;color:var(--slate);line-height:1.8">
-        <div><strong style="color:var(--cream)">Model:</strong> claude-opus-4-5</div>
+        <div><strong style="color:var(--cream)">Model:</strong> claude-sonnet-4-5</div>
         <div><strong style="color:var(--cream)">Status:</strong> <span style="color:var(--green)">● Active</span></div>
         <div><strong style="color:var(--cream)">Cost:</strong> ~₹2–10 per PDF (charged to administrator's account)</div>
       </div>`;
@@ -1111,7 +1495,7 @@ $("SEL_NONE").onclick=()=>{S.selFields=[];renderPicker();$("SEL_CNT").textConten
 $("EXTRACT_BTN").onclick=runExtraction;
 $("INP_CO").addEventListener("input",updateExtBtn);
 
-$("SET_KEY_SAVE").onclick=()=>{const k=$("SET_KEY").value.trim();S.apiKey=k;localStorage.setItem("hfc_ak",k||"");$("KEY_STATUS").textContent=k?"Set":"Not set";$("KEY_STATUS").className="bdg "+(k?"bg":"bs");$("KEY_BTN").textContent=k?"⚙ API Key":"+ API Key";$("U_NOTE").textContent=k?"🤖 claude-opus-4-5 · ~₹2–10/PDF":"⚡ Demo mode — add API key for real extraction";toast(k?"✓ API key saved":"API key cleared");renderDash();};
+$("SET_KEY_SAVE").onclick=()=>{const k=$("SET_KEY").value.trim();S.apiKey=k;localStorage.setItem("hfc_ak",k||"");$("KEY_STATUS").textContent=k?"Set":"Not set";$("KEY_STATUS").className="bdg "+(k?"bg":"bs");$("KEY_BTN").textContent=k?"⚙ API Key":"+ API Key";$("U_NOTE").textContent=k?"🤖 claude-sonnet-4-5 · ~₹0.50–2/PDF":"⚡ Demo mode — add API key for real extraction";toast(k?"✓ API key saved":"API key cleared");renderDash();};
 $("SET_KEY_CLR").onclick=()=>{S.apiKey="";localStorage.removeItem("hfc_ak");$("SET_KEY").value="";$("KEY_STATUS").textContent="Not set";$("KEY_STATUS").className="bdg bs";renderDash();};
 $("SB_SAVE").onclick=async()=>{
   const url=$("SET_SB_URL").value.trim();const key=$("SET_SB_KEY").value.trim();
@@ -1123,8 +1507,634 @@ $("SB_SAVE").onclick=async()=>{
 $("SB_CLR").onclick=()=>{S.sbUrl="";S.sbKey="";S.sbConnected=false;localStorage.removeItem("hfc_sb_url");localStorage.removeItem("hfc_sb_key");updateSyncUI("Not configured","off");$("SET_SB_URL").value="";$("SET_SB_KEY").value="";};
 $("CLEAR_ALL").onclick=()=>{if(confirm("Clear all local extraction data? Cannot be undone.")){S.extractions=[];saveLocal();updateCnt();renderDash();toast("Local data cleared.");}};
 
+$("ASK_BTN").onclick = runAsk;
+
+// Alerts
+document.getElementById("ALERTS_BTN").onclick = runAlerts;
+document.getElementById("ALERTS_REFRESH").onclick = runAlerts;
+
+// Score
+document.getElementById("SCORE_BTN").onclick = runScore;
+
+// Board Pack
+document.getElementById("BP_BTN").onclick = runBoardPack;
+
+// My Company file wiring
+(function(){
+  const fi=document.getElementById("MC_FI");
+  const dz=document.getElementById("MC_DZ");
+  if(fi) fi.onchange=e=>{myCompanyFile=e.target.files[0];if(myCompanyFile){document.getElementById("MC_FILE").innerHTML=`<div class="fi-item"><span class="fi-ic">📄</span><div class="fi-info"><div class="fi-name">${myCompanyFile.name}</div><div class="fi-size">${(myCompanyFile.size/1048576).toFixed(2)} MB</div></div><button class="btn ghost xs" onclick="myCompanyFile=null;document.getElementById('MC_FILE').innerHTML='';document.getElementById('MC_BTN').disabled=true">Remove</button></div>`;checkMCReady();}};
+  if(dz){dz.onclick=()=>fi.click();dz.ondragover=e=>{e.preventDefault();dz.style.borderColor="var(--gold)";};dz.ondragleave=()=>{dz.style.borderColor="";};dz.ondrop=e=>{e.preventDefault();dz.style.borderColor="";const f=e.dataTransfer.files[0];if(f&&f.type==="application/pdf"){fi.files=e.dataTransfer.files;myCompanyFile=f;document.getElementById("MC_FILE").innerHTML=`<div class="fi-item"><span class="fi-ic">📄</span><div class="fi-info"><div class="fi-name">${f.name}</div><div class="fi-size">${(f.size/1048576).toFixed(2)} MB</div></div></div>`;checkMCReady();}};}
+  document.getElementById("MC_CO").oninput=checkMCReady;
+  document.getElementById("MC_PER").oninput=checkMCReady;
+})();
+
+function checkMCReady(){const co=document.getElementById("MC_CO").value.trim();const per=document.getElementById("MC_PER").value.trim();document.getElementById("MC_BTN").disabled=!(co&&per&&myCompanyFile);}
+document.getElementById("MC_BTN").onclick=runMyCompany;
+
+// Concall file wiring
+(function(){
+  const fi=document.getElementById("CC_FI");
+  const dz=document.getElementById("CC_DZ");
+  if(fi) fi.onchange=e=>{concallFile=e.target.files[0];if(concallFile){document.getElementById("CC_FILE").innerHTML=`<div class="fi-item"><span class="fi-ic">📄</span><div class="fi-info"><div class="fi-name">${concallFile.name}</div><div class="fi-size">${(concallFile.size/1048576).toFixed(2)} MB</div></div><button class="btn ghost xs" onclick="concallFile=null;document.getElementById('CC_FILE').innerHTML='';document.getElementById('CC_BTN').disabled=true">Remove</button></div>`;checkCCReady();}};
+  if(dz){dz.onclick=()=>fi.click();dz.ondragover=e=>{e.preventDefault();dz.style.borderColor="var(--gold)";};dz.ondragleave=()=>{dz.style.borderColor="";};dz.ondrop=e=>{e.preventDefault();dz.style.borderColor="";const f=e.dataTransfer.files[0];if(f&&f.type==="application/pdf"){fi.files=e.dataTransfer.files;concallFile=f;document.getElementById("CC_FILE").innerHTML=`<div class="fi-item"><span class="fi-ic">📄</span><div class="fi-info"><div class="fi-name">${f.name}</div><div class="fi-size">${(f.size/1048576).toFixed(2)} MB</div></div></div>`;checkCCReady();}};}
+  document.getElementById("CC_CO").oninput=checkCCReady;
+})();
+
+function checkCCReady(){const co=document.getElementById("CC_CO").value.trim();document.getElementById("CC_BTN").disabled=!(co&&concallFile);}
+document.getElementById("CC_BTN").onclick=runConcall;
+$("ASK_INPUT").addEventListener("keydown", e=>{ if(e.key==="Enter"&&(e.ctrlKey||e.metaKey)) runAsk(); });
+
+document.getElementById("MKE_SAVE_BTN").onclick = saveMKE;
+document.getElementById("MKE_PARSE_BTN").onclick = parseMKEPaste;
+
 // Keyboard shortcuts
 document.addEventListener("keydown",e=>{if(e.altKey){if(e.key==="u")go("upload");if(e.key==="c")go("compare");if(e.key==="r")go("results");if(e.key==="t")go("trends");}});
+
+/* ════════════════════════════════════════════════
+   ASK YOUR DATA
+   ════════════════════════════════════════════════ */
+let askHistory = [];
+
+function buildDataContext(){
+  const ex = S.extractions.length >= 1 ? S.extractions : DEMO_EXTRACTIONS;
+  const lines = [];
+  lines.push("You have access to the following HFC competitor extractions:");
+  lines.push("");
+  ex.forEach(e => {
+    if(e.is_demo && S.extractions.length > 0) return;
+    const f = e.data?.fields || {};
+    const vals = Object.entries(f)
+      .filter(([k,v]) => v?.value != null)
+      .map(([k,v]) => {
+        const field = FIELDS.find(ff=>ff.k===k);
+        return `${field?.l||k}: ${v.value}${field?.u?" "+field.u:""}`;
+      }).join(", ");
+    lines.push(`[${e.company} | ${e.period} | ${(e.doc_type||"").replace(/_/g," ")}]`);
+    lines.push(vals);
+    lines.push("");
+  });
+  return lines.join("\n");
+}
+
+async function runAsk(){
+  const q = $("ASK_INPUT").value.trim();
+  if(!q) return;
+  if(!S.apiKey){ toast("⚠ API key required"); return; }
+
+  // Show thinking
+  $("ASK_THINKING").classList.remove("hidden");
+  $("ASK_PROG").style.width = "20%";
+  $("ASK_STATUS").textContent = "Preparing data context…";
+  $("ASK_BTN").disabled = true;
+
+  const dataCtx = buildDataContext();
+  setTimeout(()=>{ $("ASK_PROG").style.width="50%"; $("ASK_STATUS").textContent="Sending to Claude…"; }, 400);
+
+  try{
+    const messages = [
+      ...askHistory,
+      { role:"user", content: askHistory.length === 0
+        ? `Here is my HFC competitor extracted data:\n\n${dataCtx}\n\n---\n\nQuestion: ${q}`
+        : q
+      }
+    ];
+
+    const resp = await fetch("https://api.anthropic.com/v1/messages",{
+      method:"POST",
+      headers:{"Content-Type":"application/json","x-api-key":S.apiKey,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
+      body:JSON.stringify({
+        model: "claude-sonnet-4-5",
+        max_tokens: 1024,
+        system: `You are a financial analyst assistant for an Indian Housing Finance Company. 
+You have been given structured KPI extraction data from multiple competitor HFCs.
+Answer questions clearly and concisely. 
+- When ranking, always show the full ranked list with values
+- Use ₹ for INR amounts, % for percentages  
+- If data is missing for a company/period, say so explicitly
+- Be direct — lead with the answer, then explain
+- Use bullet points for rankings and comparisons`,
+        messages
+      })
+    });
+
+    $("ASK_PROG").style.width = "90%";
+    $("ASK_STATUS").textContent = "Formatting answer…";
+
+    if(!resp.ok){ const e=await resp.json().catch(()=>({})); throw new Error(e.error?.message||"API error"); }
+    const data = await resp.json();
+    const answer = data.content[0].text;
+
+    // Update conversation history (keep last 6 turns to stay within context)
+    askHistory.push({role:"user", content: askHistory.length===0 ? `Here is my HFC competitor extracted data:\n\n${dataCtx}\n\nQuestion: ${q}` : q});
+    askHistory.push({role:"assistant", content: answer});
+    if(askHistory.length > 12) askHistory = askHistory.slice(-12);
+
+    // Render answer
+    renderAskAnswer(q, answer);
+    $("ASK_INPUT").value = "";
+
+  } catch(err){
+    renderAskAnswer(q, "⚠ Error: " + (err.message||"Unknown error"), true);
+  } finally {
+    $("ASK_THINKING").classList.add("hidden");
+    $("ASK_BTN").disabled = false;
+    $("ASK_PROG").style.width = "5%";
+  }
+}
+
+function renderAskAnswer(question, answer, isError=false){
+  const hist = $("ASK_HISTORY");
+  const wrap = document.createElement("div");
+  wrap.style.cssText = "margin-bottom:14px;animation:fu .28s ease both";
+
+  // Format answer — convert markdown-ish to HTML
+  const formatted = answer
+    .replace(/\*\*(.*?)\*\*/g, '<strong style="color:var(--cream)">$1</strong>')
+    .replace(/^(\d+)\.\s+/gm, '<span style="color:var(--gold);font-weight:600;font-family:var(--mono)">$1.</span> ')
+    .replace(/^[-•]\s+/gm, '<span style="color:var(--gold)">▸</span> ')
+    .replace(/\n/g, '<br/>')
+    .split('\n').join('<br/>');
+
+  const ansColor = isError ? "var(--red)" : "var(--slate)";
+  const borderExtra = isError ? "border-color:rgba(240,96,112,.3);" : "";
+  wrap.innerHTML =
+    '<div style="background:var(--bg3);border-radius:8px 8px 0 0;padding:10px 16px;border:1px solid var(--edge);border-bottom:none">' +
+    '<span style="font-size:11px;color:var(--slate);font-weight:600;text-transform:uppercase;letter-spacing:1px">You asked</span>' +
+    '<div style="font-size:13px;color:var(--cream);margin-top:4px;font-style:italic">&ldquo;' + question + '&rdquo;</div></div>' +
+    '<div style="background:var(--bg2);border-radius:0 0 8px 8px;padding:16px;border:1px solid var(--edge);' + borderExtra + '">' +
+    '<div style="font-size:13px;color:' + ansColor + ';line-height:1.8">' + formatted.split("\n").join("<br/>") + '</div>' +
+    '<div style="margin-top:10px;display:flex;gap:6px">' +
+    '<button class="btn ghost xs" onclick="followUp(this)" style="font-size:10.5px">&#x21A9; Follow up</button>' +
+    '<button class="btn ghost xs" onclick="this.closest(\'[data-wrap]\').remove()" style="font-size:10.5px">&#x2715; Dismiss</button>' +
+    '</div></div>';
+  wrap.setAttribute("data-wrap","1");
+  hist.insertBefore(wrap, hist.firstChild);
+}
+
+window.askSample = function(btn){ $("ASK_INPUT").value = btn.dataset.q; $("ASK_INPUT").focus(); };
+window.followUp = function(btn){ $("ASK_INPUT").value = ""; $("ASK_INPUT").focus(); $("ASK_INPUT").placeholder = "Ask a follow-up question…"; };
+
+/* ════════════════════════════════════════════════
+   MY COMPANY VS PEERS
+   ════════════════════════════════════════════════ */
+let myCompanyFile = null;
+const mcDz = document.getElementById ? null : null; // wired after DOM
+
+function renderMyCompany(){
+  const periods=[...new Set(S.extractions.map(e=>e.period).filter(Boolean))].sort((a,b)=>b.localeCompare(a));
+}
+
+async function runMyCompany(){
+  const co = document.getElementById("MC_CO").value.trim();
+  const per = document.getElementById("MC_PER").value.trim();
+  if(!co||!per||!myCompanyFile){setAlert("MC_ALERT","Please fill company name, period and upload a PDF.","ae");return;}
+  if(!S.apiKey){setAlert("MC_ALERT","API key required.","ae");return;}
+  document.getElementById("MC_BTN").disabled=true;
+  document.getElementById("MC_BTN").textContent="Extracting…";
+  try{
+    const b64=await toB64(myCompanyFile);
+    const activeFields=FIELDS.filter(f=>f.k!=="period");
+    const resp=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json","x-api-key":S.apiKey,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify({model:document.getElementById("INP_MODEL")?.value||"claude-sonnet-4-5",max_tokens:8192,messages:[{role:"user",content:[{type:"document",source:{type:"base64",media_type:"application/pdf",data:b64}},{type:"text",text:buildPrompt(activeFields)}]}]})});
+    if(!resp.ok)throw new Error("API error "+resp.status);
+    const data=await resp.json();
+    const raw=data.content[0].text;
+    const parsed=JSON.parse(raw.replace(/```json\s*/g,"").replace(/```\s*/g,"").trim());
+    // Add as extraction tagged as "my_company"
+    const ext={id:"my_"+Date.now(),company:co,period:per,doc_type:"my_company",file_name:myCompanyFile.name,tokens:(data.usage?.input_tokens||0)+(data.usage?.output_tokens||0),is_demo:false,notes:"My Company",created_at:new Date().toISOString(),data:parsed};
+    S.extractions.unshift(ext);saveLocal();sbInsert(ext);updateCnt();
+    // Render positioning vs peers for this period
+    renderMCResult(ext,per);
+  }catch(e){setAlert("MC_ALERT","Extraction failed: "+e.message,"ae");}
+  finally{document.getElementById("MC_BTN").disabled=false;document.getElementById("MC_BTN").textContent="🏢 Extract & Compare →";}
+}
+
+function renderMCResult(myExt,period){
+  const peers=S.extractions.filter(e=>e.period===period&&e.id!==myExt.id&&e.doc_type!=="my_company");
+  const allEx=[myExt,...peers];
+  const div=document.getElementById("MC_RESULT");div.innerHTML="";
+  const keyKPIs=["aum","nim","gnpa","roa","roe","car","growth_yoy","coll_efficiency","cost_income","disbursements","stage3_pct","cof"];
+  const card=document.createElement("div");card.className="card";
+  let rows="";
+  keyKPIs.forEach(k=>{
+    const field=FIELDS.find(f=>f.k===k);if(!field)return;
+    const vals=allEx.map(e=>({co:e.company,v:e.data?.fields?.[k]?.value,isMe:e.id===myExt.id})).filter(x=>x.v!=null);
+    if(!vals.length)return;
+    const sorted=[...vals].sort((a,b)=>LOB.has(k)?a.v-b.v:b.v-a.v);
+    const myRank=sorted.findIndex(x=>x.isMe)+1;
+    const rankColor=myRank===1?"var(--green)":myRank<=Math.ceil(sorted.length/2)?"var(--amber)":"var(--red)";
+    const myVal=vals.find(x=>x.isMe);
+    rows+=`<tr><td style="font-size:12.5px;color:var(--cream);font-weight:500">${field.l}</td><td><span class="num">${myVal?.v||"—"}</span><span class="unt">${field.u}</span></td><td style="font-family:var(--mono);font-weight:700;color:${rankColor}">#${myRank} of ${sorted.length}</td><td style="font-size:11px;color:var(--slate)">${sorted.map((x,i)=>`${i+1}. ${x.co} (${x.v}${field.u})`).join(" · ")}</td></tr>`;
+  });
+  card.innerHTML=`<div class="card-hd"><div class="card-t">${myExt.company} vs ${peers.length} peers — ${period}</div><span class="bdg bg">${peers.length} companies compared</span></div><div style="overflow-x:auto"><table class="tbl"><thead><tr><th>KPI</th><th>Your Value</th><th>Your Rank</th><th>Peer Rankings</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  div.appendChild(card);
+}
+
+/* ════════════════════════════════════════════════
+   RED FLAG ALERTS
+   ════════════════════════════════════════════════ */
+async function runAlerts(){
+  const ex=S.extractions.filter(e=>!e.is_demo);
+  if(ex.length<2){setAlert ? null:null;document.getElementById("ALERTS_RESULT").innerHTML='<div class="alert aw">⚠ Upload at least 2 competitor documents to generate alerts.</div>';return;}
+  if(!S.apiKey){document.getElementById("ALERTS_RESULT").innerHTML='<div class="alert ae">API key required.</div>';return;}
+  document.getElementById("ALERTS_THINKING").classList.remove("hidden");
+  document.getElementById("ALERTS_BTN").disabled=true;
+  document.getElementById("ALERTS_PROG").style.width="30%";
+  try{
+    const ctx=buildDataContext();
+    const prompt=`You are a senior HFC analyst. Analyse this competitor data and identify:
+1. RED FLAGS — deteriorating metrics, concerning trends, QoQ worsening (GNPA rising, NIM compressing, growth slowing, CAR declining, etc.)
+2. GREEN FLAGS — improving metrics, positive momentum, standout performance
+
+For each flag:
+- Company name
+- What the flag is (specific metric and value)
+- Why it matters strategically
+- Severity: HIGH / MEDIUM / LOW
+
+Data:
+${ctx}
+
+Respond in this exact JSON format (no markdown):
+{"red_flags":[{"company":"","metric":"","observation":"","implication":"","severity":"HIGH"}],"green_flags":[{"company":"","metric":"","observation":"","implication":"","severity":"HIGH"}]}`;
+
+    const resp=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json","x-api-key":S.apiKey,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify({model:"claude-sonnet-4-5",max_tokens:2048,messages:[{role:"user",content:prompt}]})});
+    document.getElementById("ALERTS_PROG").style.width="80%";
+    if(!resp.ok)throw new Error("API error");
+    const data=await resp.json();
+    const parsed=JSON.parse(data.content[0].text.replace(/```json\s*/g,"").replace(/```\s*/g,"").trim());
+    renderAlerts(parsed);
+    document.getElementById("ALERTS_REFRESH").style.display="";
+  }catch(e){document.getElementById("ALERTS_RESULT").innerHTML=`<div class="alert ae">Error: ${e.message}</div>`;}
+  finally{document.getElementById("ALERTS_THINKING").classList.add("hidden");document.getElementById("ALERTS_BTN").disabled=false;document.getElementById("ALERTS_PROG").style.width="5%";}
+}
+
+function renderAlerts(data){
+  const div=document.getElementById("ALERTS_RESULT");div.innerHTML="";
+  const sevColor={HIGH:"var(--red)",MEDIUM:"var(--amber)",LOW:"var(--slate)"};
+  const sevBdg={HIGH:"br",MEDIUM:"ba",LOW:"bs"};
+
+  if(data.red_flags?.length){
+    const sec=document.createElement("div");
+    sec.innerHTML=`<div style="font-size:11px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px">🚨 Red Flags (${data.red_flags.length})</div>`;
+    data.red_flags.forEach(f=>{
+      const card=document.createElement("div");card.className="card";card.style.marginBottom="10px";card.style.borderColor="rgba(240,96,112,.25)";
+      card.innerHTML=`<div class="card-bd" style="padding:14px 18px"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:8px"><div style="font-size:13px;font-weight:600;color:var(--cream)">${f.company} <span style="color:var(--red)">·</span> ${f.metric}</div><span class="bdg ${sevBdg[f.severity]||"br"}">${f.severity}</span></div><div style="font-size:12.5px;color:var(--slate);margin-bottom:6px">${f.observation}</div><div style="font-size:12px;color:var(--red);font-style:italic">⚠ ${f.implication}</div></div>`;
+      sec.appendChild(card);
+    });
+    div.appendChild(sec);
+  }
+
+  if(data.green_flags?.length){
+    const sec=document.createElement("div");sec.style.marginTop="20px";
+    sec.innerHTML=`<div style="font-size:11px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px">✅ Green Flags (${data.green_flags.length})</div>`;
+    data.green_flags.forEach(f=>{
+      const card=document.createElement("div");card.className="card";card.style.marginBottom="10px";card.style.borderColor="rgba(45,212,160,.2)";
+      card.innerHTML=`<div class="card-bd" style="padding:14px 18px"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:8px"><div style="font-size:13px;font-weight:600;color:var(--cream)">${f.company} <span style="color:var(--green)">·</span> ${f.metric}</div><span class="bdg ${sevBdg[f.severity]||"bg"}">${f.severity}</span></div><div style="font-size:12.5px;color:var(--slate);margin-bottom:6px">${f.observation}</div><div style="font-size:12px;color:var(--green);font-style:italic">✓ ${f.implication}</div></div>`;
+      sec.appendChild(card);
+    });
+    div.appendChild(sec);
+  }
+}
+
+/* ════════════════════════════════════════════════
+   CONCALL HIGHLIGHTS
+   ════════════════════════════════════════════════ */
+let concallFile = null;
+
+async function runConcall(){
+  const co=document.getElementById("CC_CO").value.trim();
+  const per=document.getElementById("CC_PER").value.trim();
+  if(!co||!concallFile){setAlert("CC_ALERT","Please enter company name and upload a transcript.","ae");return;}
+  if(!S.apiKey){setAlert("CC_ALERT","API key required.","ae");return;}
+  document.getElementById("CC_BTN").disabled=true;document.getElementById("CC_BTN").textContent="Extracting…";
+  try{
+    const b64=await toB64(concallFile);
+    const prompt=`You are a senior HFC analyst. Extract key highlights from this earnings call / concall transcript for ${co} ${per||""}.
+
+Extract and structure:
+1. Management Guidance — AUM growth target, NIM guidance, credit cost outlook, disbursement targets
+2. Key Management Quotes — verbatim impactful quotes (max 5)
+3. Asset Quality Commentary — any comments on GNPA, Stage 2/3, collections
+4. Growth Strategy — new segments, geographies, product focus
+5. Analyst Concerns — what analysts pushed back on or expressed concern about
+6. Positive Surprises — anything better than expected
+7. Watch Points — things to monitor next quarter
+
+Respond ONLY in JSON (no markdown):
+{"company":"","period":"","management_guidance":[""],"key_quotes":[{"speaker":"","quote":""}],"asset_quality":[""],"growth_strategy":[""],"analyst_concerns":[""],"positive_surprises":[""],"watch_points":[""]}`;
+
+    const resp=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json","x-api-key":S.apiKey,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify({model:"claude-sonnet-4-5",max_tokens:2048,messages:[{role:"user",content:[{type:"document",source:{type:"base64",media_type:"application/pdf",data:b64}},{type:"text",text:prompt}]}]})});
+    if(!resp.ok)throw new Error("API error "+resp.status);
+    const data=await resp.json();
+    const parsed=JSON.parse(data.content[0].text.replace(/```json\s*/g,"").replace(/```\s*/g,"").trim());
+    renderConcall(parsed,co,per);
+    setAlert("CC_ALERT","✓ Concall highlights extracted for "+co,"ao");
+  }catch(e){setAlert("CC_ALERT","Error: "+e.message,"ae");}
+  finally{document.getElementById("CC_BTN").disabled=false;document.getElementById("CC_BTN").textContent="🎙 Extract Highlights →";}
+}
+
+function renderConcall(d,co,per){
+  const div=document.getElementById("CC_RESULT");div.innerHTML="";
+  const sections=[
+    {key:"management_guidance",title:"📊 Management Guidance",color:"var(--blue)"},
+    {key:"asset_quality",title:"🏦 Asset Quality Commentary",color:"var(--amber)"},
+    {key:"growth_strategy",title:"🚀 Growth Strategy",color:"var(--green)"},
+    {key:"analyst_concerns",title:"⚠ Analyst Concerns",color:"var(--red)"},
+    {key:"positive_surprises",title:"✨ Positive Surprises",color:"var(--green)"},
+    {key:"watch_points",title:"👁 Watch Points Next Quarter",color:"var(--purple)"},
+  ];
+  const wrap=document.createElement("div");
+  wrap.innerHTML=`<div class="card" style="margin-bottom:14px"><div class="card-hd"><div style="font-family:var(--display);font-size:18px;color:var(--cream);font-weight:600">${d.company||co} ${d.period||per}</div></div></div>`;
+
+  if(d.key_quotes?.length){
+    const qc=document.createElement("div");qc.className="card";qc.style.marginBottom="14px";
+    qc.innerHTML=`<div class="card-hd"><div class="card-t">💬 Key Management Quotes</div></div><div class="card-bd">${d.key_quotes.map(q=>`<div style="border-left:3px solid var(--gold);padding:8px 14px;margin-bottom:10px;background:var(--bg3);border-radius:0 7px 7px 0"><div style="font-size:12.5px;color:var(--cream);font-style:italic;line-height:1.6">"${q.quote}"</div>${q.speaker?`<div style="font-size:10.5px;color:var(--gold);margin-top:4px;font-weight:600">— ${q.speaker}</div>`:""}</div>`).join("")}</div>`;
+    wrap.appendChild(qc);
+  }
+
+  sections.forEach(s=>{
+    if(!d[s.key]?.length)return;
+    const sc=document.createElement("div");sc.className="card";sc.style.marginBottom="10px";
+    sc.innerHTML=`<div class="card-hd"><div class="card-t" style="color:${s.color}">${s.title}</div></div><div class="card-bd"><ul style="list-style:none;padding:0;margin:0">${d[s.key].map(item=>`<li style="padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:12.5px;color:var(--slate);line-height:1.6"><span style="color:${s.color};margin-right:8px">▸</span>${item}</li>`).join("")}</ul></div>`;
+    wrap.appendChild(sc);
+  });
+  div.appendChild(wrap);
+}
+
+/* ════════════════════════════════════════════════
+   POSITIONING SCORE
+   ════════════════════════════════════════════════ */
+let scorePeriod = null;
+
+function renderScore(){
+  const periods=[...new Set(S.extractions.map(e=>e.period).filter(Boolean))].sort((a,b)=>b.localeCompare(a));
+  if(!scorePeriod&&periods.length)scorePeriod=periods[0];
+  const pDiv=document.getElementById("SCORE_PERIODS");pDiv.innerHTML="";
+  periods.forEach(p=>{const btn=document.createElement("button");btn.className="pp"+(scorePeriod===p?" on":"");btn.textContent=p;btn.onclick=()=>{scorePeriod=p;renderScore();};pDiv.appendChild(btn);});
+}
+
+async function runScore(){
+  const ex=(S.extractions.length?S.extractions:DEMO_EXTRACTIONS).filter(e=>e.period===scorePeriod);
+  if(!ex.length){document.getElementById("SCORE_RESULT").innerHTML='<div class="alert aw">No data for this period.</div>';return;}
+  if(!S.apiKey){document.getElementById("SCORE_RESULT").innerHTML='<div class="alert ae">API key required.</div>';return;}
+  document.getElementById("SCORE_THINKING").classList.remove("hidden");
+  document.getElementById("SCORE_BTN").disabled=true;
+  document.getElementById("SCORE_PROG").style.width="30%";
+  try{
+    const ctx=ex.map(e=>{const f=e.data?.fields||{};const vals=Object.entries(f).filter(([k,v])=>v?.value!=null).map(([k,v])=>{const fd=FIELDS.find(ff=>ff.k===k);return"  "+(fd?.l||k)+": "+v.value+(fd?.u?" "+fd.u:"");}).join("\n");return e.company+":\n"+vals;}).join("\n\n");
+
+    const prompt=`You are a senior HFC industry analyst. Score each company on a 0-100 scale across 6 strategic dimensions based on this data.
+
+Dimensions:
+1. Growth (AUM growth, disbursements, expansion)
+2. Profitability (NIM, RoA, RoE, spread, PAT)  
+3. Asset Quality (GNPA, NNPA, Stage 3, credit cost, collection efficiency)
+4. Capital Strength (CAR, Tier 1, LCR)
+5. Operational Efficiency (Cost-to-income, branches, employees)
+6. Franchise Quality (affordable mix, salaried mix, avg ticket, LTV)
+
+Data for ${scorePeriod}:
+${ctx}
+
+Respond ONLY in JSON (no markdown):
+{"period":"","companies":[{"name":"","scores":{"growth":0,"profitability":0,"asset_quality":0,"capital":0,"efficiency":0,"franchise":0},"total":0,"rank":1,"summary":"one sentence on their strategic position"}]}`;
+
+    const resp=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json","x-api-key":S.apiKey,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify({model:"claude-sonnet-4-5",max_tokens:2048,messages:[{role:"user",content:prompt}]})});
+    document.getElementById("SCORE_PROG").style.width="80%";
+    if(!resp.ok)throw new Error("API error");
+    const data=await resp.json();
+    const parsed=JSON.parse(data.content[0].text.replace(/```json\s*/g,"").replace(/```\s*/g,"").trim());
+    renderScoreResult(parsed);
+  }catch(e){document.getElementById("SCORE_RESULT").innerHTML=`<div class="alert ae">Error: ${e.message}</div>`;}
+  finally{document.getElementById("SCORE_THINKING").classList.add("hidden");document.getElementById("SCORE_BTN").disabled=false;document.getElementById("SCORE_PROG").style.width="5%";}
+}
+
+function renderScoreResult(data){
+  const div=document.getElementById("SCORE_RESULT");div.innerHTML="";
+  const sorted=[...data.companies].sort((a,b)=>b.total-a.total);
+  const dims=["growth","profitability","asset_quality","capital","efficiency","franchise"];
+  const dimLabels={growth:"Growth",profitability:"Profitability",asset_quality:"Asset Quality",capital:"Capital",efficiency:"Efficiency",franchise:"Franchise"};
+  const dimColors={growth:"var(--blue)",profitability:"var(--gold)",asset_quality:"var(--green)",capital:"var(--purple)",efficiency:"var(--amber)",franchise:"var(--cream)"};
+
+  const card=document.createElement("div");card.className="card";
+  let rows=sorted.map((co,i)=>{
+    const rankColor=i===0?"var(--green)":i===1?"var(--amber)":i===sorted.length-1?"var(--red)":"var(--slate)";
+    const dimCells=dims.map(d=>{const s=co.scores[d]||0;const w=s+"%";const c=s>=70?"var(--green)":s>=50?"var(--amber)":"var(--red)";return`<td style="text-align:center"><div style="font-family:var(--mono);font-size:12px;font-weight:600;color:${c}">${s}</div><div style="height:3px;background:var(--bg4);border-radius:2px;margin-top:3px"><div style="height:100%;width:${w};background:${c};border-radius:2px"></div></div></td>`;}).join("");
+    return`<tr><td style="font-weight:600;color:var(--cream)">${co.name}</td><td style="font-family:var(--mono);font-size:20px;font-weight:700;color:${rankColor}">${co.total}</td>${dimCells}<td style="font-size:11px;color:var(--slate);font-style:italic;max-width:200px">${co.summary}</td></tr>`;
+  }).join("");
+
+  card.innerHTML=`<div class="card-hd"><div class="card-t">Strategic Positioning Scores — ${data.period||scorePeriod}</div><span class="bdg bgold">${sorted.length} companies</span></div><div style="overflow-x:auto"><table class="tbl"><thead><tr><th>Company</th><th>Score /100</th>${dims.map(d=>`<th style="text-align:center;color:${dimColors[d]}">${dimLabels[d]}</th>`).join("")}<th>Positioning</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  div.appendChild(card);
+}
+
+/* ════════════════════════════════════════════════
+   BOARD PACK GENERATOR
+   ════════════════════════════════════════════════ */
+async function runBoardPack(){
+  const myCo=document.getElementById("BP_CO").value.trim();
+  const period=document.getElementById("BP_PER").value;
+  const tone=document.getElementById("BP_TONE").value;
+  if(!period){document.getElementById("BP_RESULT").innerHTML='<div class="alert aw">Please select a reporting period.</div>';return;}
+  if(!S.apiKey){document.getElementById("BP_RESULT").innerHTML='<div class="alert ae">API key required.</div>';return;}
+  document.getElementById("BP_THINKING").classList.remove("hidden");
+  document.getElementById("BP_BTN").disabled=true;
+  document.getElementById("BP_PROG").style.width="30%";
+  try{
+    const ex=(S.extractions.length?S.extractions:DEMO_EXTRACTIONS).filter(e=>e.period===period);
+    const ctx=ex.map(e=>{const f=e.data?.fields||{};const vals=Object.entries(f).filter(([k,v])=>v?.value!=null).map(([k,v])=>{const fd=FIELDS.find(ff=>ff.k===k);return"  "+(fd?.l||k)+": "+v.value+(fd?.u?" "+fd.u:"");}).join("\n");return e.company+":\n"+vals;}).join("\n\n");
+
+    const toneInstructions={
+      board:"Write in formal third-person board report style. Be concise — max 4 paragraphs. Use precise numbers.",
+      management:"Write in direct first-person management review style. Be action-oriented. Highlight gaps and opportunities.",
+      investor:"Write in investor-friendly tone. Emphasise strengths, growth trajectory, and competitive positioning."
+    };
+
+    const prompt=`You are a CFO preparing a competitor analysis section for a board pack.
+${myCo?`The client company is ${myCo}.`:""}
+${toneInstructions[tone]}
+
+Write a comprehensive competitive intelligence commentary for ${period} covering:
+1. Industry overview (2-3 sentences on sector trends)
+2. Peer group performance summary (highlight standouts)
+3. Key competitive dynamics (NIM compression/expansion, asset quality trends, growth leaders)
+4. ${myCo?"Our positioning vs peers — where we lead, where we lag":"Top performers and laggards"}
+5. Watch points for next quarter
+
+Then provide a "Key Numbers at a Glance" section with:
+- Best/worst GNPA in peer group
+- Best/worst NIM 
+- Fastest/slowest AUM growth
+- Best/worst RoA
+
+Peer data for ${period}:
+${ctx}
+
+Respond with the commentary as clean, formatted text (no JSON, use paragraphs and bullet points).`;
+
+    const resp=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json","x-api-key":S.apiKey,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify({model:"claude-sonnet-4-5",max_tokens:2048,messages:[{role:"user",content:prompt}]})});
+    document.getElementById("BP_PROG").style.width="80%";
+    if(!resp.ok)throw new Error("API error");
+    const data=await resp.json();
+    renderBoardPack(data.content[0].text,myCo,period,tone);
+  }catch(e){document.getElementById("BP_RESULT").innerHTML=`<div class="alert ae">Error: ${e.message}</div>`;}
+  finally{document.getElementById("BP_THINKING").classList.add("hidden");document.getElementById("BP_BTN").disabled=false;document.getElementById("BP_PROG").style.width="5%";}
+}
+
+function renderBoardPack(text,myCo,period,tone){
+  const div=document.getElementById("BP_RESULT");div.innerHTML="";
+  const formatted=text.replace(/\*\*(.*?)\*\*/g,"<strong>$1</strong>").split("\n").map(function(l){if(l.startsWith("- ")||l.startsWith("• "))return'<li style="margin-bottom:5px;color:var(--slate)">'+l.slice(2)+"</li>";if(/^\d+\./.test(l))return'<li style="margin-bottom:8px;color:var(--cream);font-weight:500">'+l+"</li>";return'<p style="margin-bottom:10px;color:var(--slate);line-height:1.8">'+l+"</p>";}).join("")
+  const card=document.createElement("div");card.className="card";
+  const toneLabel={board:"Board Pack",management:"Management Review",investor:"Investor Communication"};
+  card.innerHTML=`<div class="card-hd"><div><div style="font-family:var(--display);font-size:17px;color:var(--cream);font-weight:600">Competitor Intelligence Commentary</div><div style="font-size:11px;color:var(--slate);margin-top:2px">${period}${myCo?" · "+myCo:""} · ${toneLabel[tone]}</div></div><button class="btn out sm" onclick="copyBoardPack()">📋 Copy</button></div><div class="card-bd" id="BP_TEXT" style="font-size:13px;line-height:1.9">${formatted}</div>`;
+  div.appendChild(card);
+}
+window.copyBoardPack=function(){const t=document.getElementById("BP_TEXT");if(t){navigator.clipboard.writeText(t.innerText);toast("✓ Copied to clipboard");}};
+
+/* ════════════════════════════════════════════════
+   MANUAL KPI ENTRY
+   ════════════════════════════════════════════════ */
+let mkeValues = {};
+
+function renderMKE(){
+  mkeValues={};
+  // Category filter buttons
+  const catDiv=document.getElementById("MKE_CAT_FILTERS");
+  catDiv.innerHTML='<button class="pp on" data-cat="all" onclick="filterMKECat(this)">All</button>'+
+    CATS.map(c=>'<button class="pp" data-cat="'+c+'" onclick="filterMKECat(this)">'+c+'</button>').join("");
+
+  renderMKEFields("all","");
+  document.getElementById("MKE_SEARCH").oninput=function(){
+    const activeCat=document.querySelector("#MKE_CAT_FILTERS .pp.on")?.dataset.cat||"all";
+    renderMKEFields(activeCat,this.value.toLowerCase());
+  };
+}
+
+window.filterMKECat=function(btn){
+  document.querySelectorAll("#MKE_CAT_FILTERS .pp").forEach(b=>b.classList.remove("on"));
+  btn.classList.add("on");
+  const q=document.getElementById("MKE_SEARCH").value.toLowerCase();
+  renderMKEFields(btn.dataset.cat,q);
+};
+
+function renderMKEFields(cat,q){
+  const grid=document.getElementById("MKE_FIELDS_GRID");grid.innerHTML="";
+  const fields=FIELDS.filter(f=>f.k!=="period"&&(cat==="all"||f.c===cat)&&(!q||f.l.toLowerCase().includes(q)||f.k.includes(q)));
+  fields.forEach(f=>{
+    const existing=mkeValues[f.k]||"";
+    const wrap=document.createElement("div");
+    wrap.style.cssText="background:var(--bg3);border-radius:8px;padding:10px 12px;border:1px solid var(--edge)";
+    const inp2=document.createElement("input");
+    inp2.className="fi";
+    inp2.style.cssText="padding:5px 8px;font-size:13px;font-family:var(--mono)";
+    inp2.dataset.key=f.k;
+    inp2.placeholder="—";
+    inp2.value=existing||"";
+    inp2.oninput=function(){mkeValues[f.k]=this.value.trim()?(parseFloat(this.value)||this.value):undefined;};
+    const hdr=document.createElement("div");
+    hdr.style.cssText="font-size:9.5px;color:var(--slate);text-transform:uppercase;letter-spacing:.8px;margin-bottom:5px;display:flex;justify-content:space-between";
+    hdr.innerHTML="<span>"+f.l+"</span><span style='color:var(--bg5)'>"+f.u+"</span>";
+    wrap.appendChild(hdr);wrap.appendChild(inp2);
+    grid.appendChild(wrap);
+  });
+}
+
+function parseMKEPaste(){
+  const raw=document.getElementById("MKE_PASTE").value.trim();
+  if(!raw)return;
+  const lines=raw.split("\n");
+  let matched=0;
+  lines.forEach(line=>{
+    const parts=line.split(",").map(s=>s.trim());
+    if(parts.length<2)return;
+    const label=parts[0].toLowerCase();
+    const val=parseFloat(parts[1]);
+    if(isNaN(val))return;
+    // Try to match to a field
+    const field=FIELDS.find(f=>
+      f.l.toLowerCase()===label||
+      f.k.toLowerCase()===label||
+      f.l.toLowerCase().includes(label)||
+      label.includes(f.k.toLowerCase())
+    );
+    if(field){mkeValues[field.k]=val;matched++;}
+  });
+  // Re-render fields to show filled values
+  const activeCat=document.querySelector("#MKE_CAT_FILTERS .pp.on")?.dataset.cat||"all";
+  const q=document.getElementById("MKE_SEARCH").value.toLowerCase();
+  renderMKEFields(activeCat,q);
+  toast("✓ Matched "+matched+" KPIs from paste");
+}
+
+function saveMKE(){
+  const co=document.getElementById("MKE_CO").value.trim();
+  const per=document.getElementById("MKE_PER").value.trim();
+  const dt=document.getElementById("MKE_DT").value;
+  if(!co||!per){setAlert("MKE_ALERT","Company name and period are required.","ae");return;}
+
+  // Collect all input values fresh
+  document.querySelectorAll("#MKE_FIELDS_GRID input[data-key]").forEach(inp=>{
+    if(inp.value.trim()){const v=parseFloat(inp.value);mkeValues[inp.dataset.key]=isNaN(v)?inp.value.trim():v;}
+  });
+
+  const filledCount=Object.keys(mkeValues).filter(k=>mkeValues[k]!=null&&mkeValues[k]!=="").length;
+  if(!filledCount){setAlert("MKE_ALERT","Please enter at least one KPI value.","ae");return;}
+
+  // Build fields object matching extraction format
+  const fields={};
+  Object.entries(mkeValues).forEach(([k,v])=>{
+    if(v!=null&&v!=="")fields[k]={value:v,conf:"high",src:"Manual entry"};
+  });
+  fields["period"]={value:per,conf:"high",src:"Manual entry"};
+
+  const ext={
+    id:"mke_"+Date.now(),
+    company:co,
+    period:per,
+    doc_type:dt,
+    file_name:"Manual Entry",
+    tokens:0,
+    is_demo:false,
+    notes:"Manual KPI entry — "+filledCount+" fields",
+    created_at:new Date().toISOString(),
+    data:{company_name:co,period_detected:per,notes:"Manually entered data",fields}
+  };
+
+  S.extractions.unshift(ext);saveLocal();sbInsert(ext);updateCnt();renderDash();
+
+  // Show success
+  setAlert("MKE_ALERT","","");
+  showMKESuccess(co,per,filledCount);
+}
+
+function showMKESuccess(co,per,count){
+  const div=document.getElementById("MKE_ALERT");
+  div.innerHTML='<div class="card" style="margin-bottom:16px;border-color:rgba(45,212,160,.3)">' +
+    '<div class="card-bd" style="text-align:center;padding:28px 20px">' +
+    '<div style="font-size:40px;margin-bottom:10px">✅</div>' +
+    '<div style="font-family:var(--display);font-size:20px;font-weight:700;color:var(--cream);margin-bottom:6px">'+co+' · '+per+' saved!</div>' +
+    '<div style="font-size:13px;color:var(--slate);margin-bottom:18px">'+count+' KPIs added to your repository</div>' +
+    '<div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">' +
+    '<button class="btn gold" onclick="go(&quot;compare&quot;)">&#x229E; Compare Now &#x2192;</button>' +
+    '<button class="btn out" onclick="addAnotherMKE()">+ Add Another Period</button>' +
+    '<button class="btn out" onclick="go(&quot;results&quot;)">View Repository &#x2192;</button>' +
+    '</div></div></div>';
+}
+
+window.addAnotherMKE=function(){
+  document.getElementById("MKE_ALERT").innerHTML="";
+  document.getElementById("MKE_PER").value="";
+  mkeValues={};
+  renderMKEFields("all","");
+  document.getElementById("MKE_PER").focus();
+};
+
+window.clearMKE=function(){
+  mkeValues={};
+  document.getElementById("MKE_PASTE").value="";
+  renderMKEFields("all","");
+  toast("Fields cleared");
+};
 
 /* ════════════════════════════════════════════════
    INIT — fetches Claude key from Supabase config table
@@ -1159,7 +2169,7 @@ async function fetchClaudeKeyFromSupabase(){
   $("KEY_BTN").style.display = S.apiKey ? "none" : "";
   renderDash(); renderPicker();
   $("SEL_CNT").textContent = S.selFields.length+" selected";
-  $("U_NOTE").textContent = S.apiKey ? "🤖 claude-opus-4-5 · ~₹2–10 per PDF" : "⚡ Demo mode";
+  $("U_NOTE").textContent = S.apiKey ? "🤖 claude-sonnet-4-5 · ~₹0.50–2 per PDF" : "⚡ Demo mode";
   if(!S.sbUrl||!S.sbKey) updateSyncUI("Local only","off");
 })();
 </script>
