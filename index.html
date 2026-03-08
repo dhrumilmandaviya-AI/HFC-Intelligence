@@ -1,0 +1,2392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>HFC Intelligence — Competitor Analytics</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#08091A;--bg2:#0C0F22;--bg3:#111629;--bg4:#1a2040;--bg5:#222844;
+  --gold:#C9A84C;--gold2:#E8C56A;--goldbg:rgba(201,168,76,.1);
+  --cream:#EEE8D5;--slate:#7A8BB0;--edge:rgba(255,255,255,.07);--edge2:rgba(255,255,255,.13);
+  --green:#2DD4A0;--red:#F06070;--amber:#F5A623;--blue:#5B9CF6;--purple:#A78BFA;
+  --display:'Cormorant Garamond',Georgia,serif;
+  --body:'IBM Plex Sans',system-ui,sans-serif;
+  --mono:'IBM Plex Mono',monospace;
+}
+html{font-size:14px;-webkit-font-smoothing:antialiased}
+body{font-family:var(--body);background:var(--bg);color:var(--cream);min-height:100vh}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:3px}
+
+/* ── SHELL ── */
+.shell{display:flex;min-height:100vh}
+.sb{width:224px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--edge);position:fixed;left:0;top:0;bottom:0;display:flex;flex-direction:column;z-index:100;transition:transform .25s}
+.sb-logo{padding:18px 18px 14px;border-bottom:1px solid var(--edge)}
+.sb-name{font-family:var(--display);font-size:19px;font-weight:700;color:var(--gold);line-height:1}
+.sb-tag{font-size:9px;color:var(--slate);text-transform:uppercase;letter-spacing:2px;margin-top:3px}
+.sb-nav{flex:1;padding:10px 8px;overflow-y:auto}
+.sb-sep{font-size:8px;color:var(--bg5);text-transform:uppercase;letter-spacing:2px;padding:12px 10px 5px;font-weight:600}
+.nb{display:flex;align-items:center;gap:9px;width:100%;padding:8px 10px;border-radius:7px;background:none;border:none;cursor:pointer;color:var(--slate);font-family:var(--body);font-size:13px;text-align:left;transition:all .14s;margin-bottom:1px}
+.nb:hover{background:var(--edge);color:var(--cream)}
+.nb.on{background:var(--goldbg);color:var(--gold);font-weight:500}
+.nb-ic{font-size:13px;width:16px;text-align:center;flex-shrink:0}
+.nc{margin-left:auto;font-size:9px;background:rgba(201,168,76,.2);color:var(--gold);padding:1px 6px;border-radius:10px;font-weight:600}
+.sb-foot{padding:10px 16px;border-top:1px solid var(--edge);font-size:10px;color:var(--bg5);line-height:1.7}
+.sb-foot span{color:var(--gold);font-weight:500}
+.main{margin-left:224px;flex:1;display:flex;flex-direction:column}
+
+/* ── TOPBAR ── */
+.topbar{position:sticky;top:0;z-index:50;height:56px;background:rgba(8,9,26,.93);backdrop-filter:blur(14px);border-bottom:1px solid var(--edge);display:flex;align-items:center;justify-content:space-between;padding:0 24px;gap:12px}
+.tb-left{display:flex;align-items:center;gap:12px}
+.tb-h{font-family:var(--display);font-size:17px;font-weight:600;color:var(--cream);white-space:nowrap}
+.tb-s{font-size:10px;color:var(--slate);white-space:nowrap}
+.tb-r{display:flex;gap:8px;align-items:center;flex-shrink:0}
+.hamburger{display:none;background:none;border:none;cursor:pointer;color:var(--slate);font-size:18px;padding:4px}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:7px;border:none;cursor:pointer;font-family:var(--body);font-size:12.5px;font-weight:500;transition:all .15s;white-space:nowrap}
+.gold{background:var(--gold);color:#08091A;font-weight:600}
+.gold:hover{background:var(--gold2);transform:translateY(-1px)}
+.out{background:transparent;border:1px solid var(--edge2);color:var(--slate)}
+.out:hover{border-color:var(--gold);color:var(--gold)}
+.ghost{background:transparent;color:var(--slate);border:none}
+.ghost:hover{color:var(--cream)}
+.danger{background:rgba(240,96,112,.1);color:var(--red);border:1px solid rgba(240,96,112,.2)}
+.danger:hover{background:rgba(240,96,112,.22)}
+.sm{padding:5px 11px;font-size:11.5px;border-radius:6px}
+.xs{padding:3px 8px;font-size:10.5px;border-radius:5px}
+.icon-btn{width:28px;height:28px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--edge);background:none;cursor:pointer;color:var(--slate);font-size:13px;transition:all .14s}
+.icon-btn:hover{border-color:rgba(201,168,76,.5);color:var(--gold)}
+.icon-btn.del:hover{border-color:rgba(240,96,112,.4);color:var(--red)}
+.btn:disabled{opacity:.35;cursor:not-allowed;transform:none!important}
+
+/* ── PAGES ── */
+.page{padding:24px;max-width:1480px}
+.hidden{display:none!important}
+
+/* ── CARDS ── */
+.card{background:var(--bg2);border:1px solid var(--edge);border-radius:10px;overflow:hidden;margin-bottom:14px}
+.card-hd{padding:13px 20px;border-bottom:1px solid var(--edge);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.card-t{font-size:13px;font-weight:600;color:var(--cream)}
+.card-bd{padding:20px}
+
+/* ── STATS GRID ── */
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:20px}
+.stat{background:var(--bg2);border:1px solid var(--edge);border-radius:10px;padding:14px 16px;position:relative;overflow:hidden}
+.stat::after{content:"";position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:0;transition:opacity .3s}
+.stat:hover::after{opacity:.4}
+.sl{font-size:9.5px;color:var(--slate);text-transform:uppercase;letter-spacing:1px;font-weight:500}
+.sv{font-family:var(--display);font-size:26px;font-weight:700;color:var(--cream);margin:4px 0 2px;line-height:1}
+.ss{font-size:10px;color:var(--slate)}
+
+/* ── DROPZONE ── */
+.dz{border:1.5px dashed var(--bg5);border-radius:10px;background:rgba(201,168,76,.02);padding:40px 28px;text-align:center;cursor:pointer;transition:all .2s;position:relative}
+.dz:hover,.dz.drag{border-color:var(--gold);background:rgba(201,168,76,.05)}
+.dz input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+
+/* ── FORM ── */
+.fg{margin-bottom:13px}
+.fl{display:block;font-size:10px;color:var(--slate);text-transform:uppercase;letter-spacing:1px;font-weight:500;margin-bottom:5px}
+.fi{width:100%;background:var(--bg3);border:1px solid var(--edge);border-radius:7px;padding:8px 12px;color:var(--cream);font-family:var(--body);font-size:13px;outline:none;transition:border-color .15s}
+.fi:focus{border-color:var(--gold)}
+.fi option{background:var(--bg3)}
+.fi-ta{resize:vertical;min-height:72px;line-height:1.6}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.frow3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+
+/* ── PROGRESS ── */
+.pb-bar{height:3px;background:var(--bg4);border-radius:2px;overflow:hidden;margin:10px 0}
+.pb-f{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2),var(--gold));background-size:200%;border-radius:2px;transition:width .4s;animation:shim 1.8s ease infinite}
+@keyframes shim{0%{background-position:0%}100%{background-position:200%}}
+
+/* ── TABLE ── */
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{background:var(--bg3);font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--slate);padding:9px 13px;text-align:left;border-bottom:1px solid var(--edge);white-space:nowrap;position:sticky;top:0}
+.tbl td{padding:9px 13px;border-bottom:1px solid rgba(255,255,255,.04);font-size:13px;vertical-align:middle}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:rgba(201,168,76,.025)}
+.num{font-family:var(--mono);font-size:13px;color:var(--gold);font-weight:500}
+.unt{font-size:10px;color:var(--slate);margin-left:2px}
+.src{font-size:10.5px;color:var(--slate);font-style:italic;max-width:260px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:help}
+
+/* ── BADGES ── */
+.bdg{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:9.5px;font-weight:600}
+.bg{background:rgba(45,212,160,.12);color:var(--green)}
+.ba{background:rgba(245,166,35,.12);color:var(--amber)}
+.br{background:rgba(240,96,112,.12);color:var(--red)}
+.bs{background:rgba(122,139,176,.1);color:var(--slate)}
+.bgold{background:var(--goldbg);color:var(--gold)}
+.bb{background:rgba(91,156,246,.12);color:var(--blue)}
+.bp{background:rgba(167,139,250,.12);color:var(--purple)}
+
+/* ── CHIPS ── */
+.chip{display:flex;align-items:center;gap:7px;padding:7px 10px;border-radius:6px;cursor:pointer;border:1px solid var(--edge);transition:all .12s;font-size:12px;color:var(--slate);user-select:none}
+.chip:hover{border-color:rgba(201,168,76,.4);color:var(--cream)}
+.chip.on{border-color:var(--gold);background:var(--goldbg);color:var(--gold)}
+.chk{width:13px;height:13px;border-radius:3px;border:1px solid var(--bg5);flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;font-size:8px}
+.chip.on .chk{background:var(--gold);border-color:var(--gold);color:#08091A}
+
+/* ── PERIOD PILLS ── */
+.pp{padding:5px 14px;border-radius:20px;border:1px solid var(--edge);background:none;cursor:pointer;font-family:var(--body);font-size:12px;color:var(--slate);transition:all .12s}
+.pp:hover{border-color:rgba(201,168,76,.4);color:var(--cream)}
+.pp.on{background:var(--goldbg);border-color:var(--gold);color:var(--gold)}
+
+/* ── ALERTS ── */
+.alert{padding:10px 14px;border-radius:7px;font-size:12.5px;display:flex;gap:9px;margin-bottom:12px;line-height:1.5;align-items:flex-start}
+.ai{background:rgba(91,156,246,.1);border:1px solid rgba(91,156,246,.2);color:#93BBFD}
+.ao{background:rgba(45,212,160,.1);border:1px solid rgba(45,212,160,.2);color:#6EE7B7}
+.ae{background:rgba(240,96,112,.1);border:1px solid rgba(240,96,112,.2);color:#FCA5A5}
+.aw{background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.2);color:#FCD34D}
+
+/* ── OVERLAY ── */
+.ov{position:fixed;inset:0;z-index:200;background:rgba(5,7,18,.97);backdrop-filter:blur(14px);display:flex;align-items:center;justify-content:center}
+.ob{background:var(--bg2);border:1px solid var(--edge2);border-radius:14px;padding:36px 32px;width:500px;max-height:90vh;overflow-y:auto}
+.ob-t{font-family:var(--display);font-size:22px;font-weight:700;color:var(--gold);margin-bottom:5px}
+.ob-s{font-size:12.5px;color:var(--slate);line-height:1.7;margin-bottom:20px}
+.sbox{background:var(--bg3);border-radius:8px;padding:14px;margin-top:10px}
+.sr{display:flex;gap:10px;margin-bottom:10px;align-items:flex-start}
+.sr:last-child{margin-bottom:0}
+.sn{width:20px;height:20px;border-radius:50%;background:var(--gold);color:#08091A;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.st{font-size:12px;color:var(--slate);line-height:1.6}
+.st strong{color:var(--cream)}
+code{font-family:var(--mono);font-size:10.5px;background:var(--bg4);color:var(--gold2);padding:1px 5px;border-radius:3px}
+
+/* ── PROCESSING ── */
+.pov{position:fixed;inset:0;z-index:900;background:rgba(5,7,18,.97);backdrop-filter:blur(12px);display:none;align-items:center;justify-content:center}
+.pov.show{display:flex}
+.pb-box{background:var(--bg2);border:1px solid var(--edge2);border-radius:14px;padding:44px 40px;width:480px;text-align:center}
+.pb-h{font-family:var(--display);font-size:22px;font-weight:600;color:var(--cream);margin-bottom:8px}
+.pb-msg{font-size:12.5px;color:var(--slate);margin-bottom:20px;line-height:1.6;min-height:36px}
+
+/* ── EMPTY ── */
+.empty{text-align:center;padding:52px 20px}
+.ei{font-size:40px;margin-bottom:10px;opacity:.3}
+.eh{font-family:var(--display);font-size:20px;color:var(--cream);margin-bottom:6px;font-weight:600}
+.ep{font-size:12px;color:var(--slate);margin-bottom:16px}
+
+/* ── PILL FILE ── */
+.fpill{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:7px;background:var(--bg3);border:1px solid var(--edge);margin-top:8px}
+
+/* ── COMPARE GRID ── */
+.cmp-wrap{display:grid}
+.cmp-wrap>div{padding:8px 14px;border-bottom:1px solid rgba(255,255,255,.04)}
+.cmp-wrap>div.hdr{background:var(--bg3);border-bottom:1px solid var(--edge);position:sticky;top:0}
+
+/* ── HEAT MAP CELL ── */
+.hm-best{background:rgba(45,212,160,.12)!important}
+.hm-good{background:rgba(45,212,160,.06)!important}
+.hm-mid{background:transparent}
+.hm-bad{background:rgba(240,96,112,.06)!important}
+.hm-worst{background:rgba(240,96,112,.12)!important}
+
+/* ── SPARKLINE ── */
+.spark{display:inline-flex;align-items:center;gap:4px;font-size:10px}
+.spark svg{display:block}
+.spark-up{color:var(--green)}
+.spark-dn{color:var(--red)}
+.spark-fl{color:var(--slate)}
+
+/* ── RADAR ── */
+.radar-wrap{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;padding:20px}
+
+/* ── SEARCH ── */
+.search-bar{display:flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--edge);border-radius:8px;padding:7px 12px;margin-bottom:14px}
+.search-bar input{background:none;border:none;outline:none;color:var(--cream);font-family:var(--body);font-size:13px;flex:1}
+.search-bar input::placeholder{color:var(--bg5)}
+
+/* ── NOTES ── */
+.note-pill{background:rgba(167,139,250,.08);border:1px solid rgba(167,139,250,.2);border-radius:7px;padding:8px 12px;font-size:11.5px;color:var(--purple);line-height:1.6;margin-top:8px}
+
+/* ── SYNC / TOAST ── */
+.syncbar{position:fixed;bottom:24px;right:24px;background:var(--bg2);border:1px solid var(--edge2);border-radius:8px;padding:9px 16px;font-size:12px;color:var(--slate);z-index:500;transition:all .25s;opacity:0;transform:translateY(8px);pointer-events:none;box-shadow:0 8px 32px rgba(0,0,0,.4)}
+.syncbar.show{opacity:1;transform:none}
+.sync-dot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:5px}
+.sync-ok{background:var(--green)}.sync-off{background:var(--slate)}.sync-err{background:var(--red)}
+
+/* ── GUIDE CODE ── */
+.cb{background:var(--bg);border:1px solid var(--edge);border-radius:7px;padding:11px 14px;font-family:var(--mono);font-size:11px;color:var(--gold2);white-space:pre-wrap;overflow-x:auto;line-height:1.8;margin:8px 0 12px}
+.cr{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:12px}
+.cr:last-child{border-bottom:none}
+
+/* ── BENCHMARK ROW ── */
+.bm-cell{background:rgba(201,168,76,.04)!important;border-left:1px solid rgba(201,168,76,.15)}
+
+/* ── TREND PAGE ── */
+.trend-co-card{background:var(--bg2);border:1px solid var(--edge);border-radius:10px;overflow:hidden;margin-bottom:16px}
+.trend-co-hd{padding:14px 20px;border-bottom:1px solid var(--edge);display:flex;align-items:center;justify-content:space-between;background:var(--bg3)}
+.trend-body{padding:16px 20px;overflow-x:auto}
+.trend-tbl{border-collapse:collapse;min-width:100%}
+.trend-tbl th{font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--slate);padding:7px 12px;text-align:right;border-bottom:1px solid var(--edge);white-space:nowrap}
+.trend-tbl th:first-child{text-align:left}
+.trend-tbl td{padding:7px 12px;border-bottom:1px solid rgba(255,255,255,.04);font-size:12.5px;vertical-align:middle;text-align:right}
+.trend-tbl td:first-child{text-align:left;font-size:12px;color:var(--slate)}
+.trend-tbl tr:last-child td{border-bottom:none}
+.trend-tbl tr:hover td{background:rgba(201,168,76,.025)}
+.delta-up{color:var(--green);font-size:10px;margin-left:4px}
+.delta-dn{color:var(--red);font-size:10px;margin-left:4px}
+.delta-fl{color:var(--slate);font-size:10px;margin-left:4px}
+
+/* ── MOBILE ── */
+@media(max-width:900px){
+  .sb{transform:translateX(-100%)}
+  .sb.open{transform:none;box-shadow:0 0 60px rgba(0,0,0,.7)}
+  .main{margin-left:0}
+  .hamburger{display:block}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .frow{grid-template-columns:1fr}
+  .radar-wrap{grid-template-columns:1fr}
+  .sb-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:99;display:none}
+  .sb-overlay.show{display:block}
+}
+@media print{
+  .sb,.topbar,.tb-r,.search-bar button,.icon-btn,.btn:not(.print-keep){display:none!important}
+  .main{margin-left:0}
+  body{background:white;color:black}
+  .card{border:1px solid #ccc;break-inside:avoid}
+  .tbl th{background:#f5f5f5;color:#333}
+  .tbl td{color:#333}
+  .num{color:#333}
+}
+
+@keyframes fu{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.fu{animation:fu .28s ease both}
+</style>
+</head>
+<body>
+
+<!-- Sidebar overlay for mobile -->
+<div class="sb-overlay" id="SB_OV" onclick="closeSidebar()"></div>
+
+<!-- ═══════════════════ ONBOARDING ═══════════════════ -->
+<div class="ov" id="OV">
+  <div class="ob fu">
+    <div class="ob-t">HFC Intelligence</div>
+    <p class="ob-s">AI-powered competitor KPI extraction for CXOs. Upload any HFC PDF — investor decks, quarterly results, scanned PDFs — Claude extracts 48 KPIs instantly.</p>
+    <div class="fg"><label class="fl">Claude API Key</label><input class="fi" type="password" id="OB_KEY" placeholder="sk-ant-api03-..." autocomplete="off"/></div>
+    <p style="font-size:11px;color:var(--slate);line-height:1.6;margin:0 0 8px">Free at <strong style="color:var(--gold)">console.anthropic.com</strong> → API Keys ($5 credit, no card needed)</p>
+    <div style="display:flex;gap:8px;margin-bottom:18px">
+      <button class="btn gold" style="flex:1" id="OB_SAVE">Start →</button>
+      <button class="btn out" id="OB_SKIP">Demo Mode</button>
+    </div>
+    <div style="border-top:1px solid var(--edge);padding-top:16px">
+      <div style="font-size:10px;color:var(--gold);text-transform:uppercase;letter-spacing:1px;font-weight:600;margin-bottom:10px">⚡ Enable Team Sharing (Supabase — optional)</div>
+      <div class="alert aw" style="margin-bottom:10px"><span>⚠</span><span style="font-size:11.5px">Without Supabase, data saves in this browser only. Configure once to share with your team.</span></div>
+      <div class="fg"><label class="fl">Supabase URL</label><input class="fi" id="OB_SB_URL" placeholder="https://xxxx.supabase.co"/></div>
+      <div class="fg" style="margin-bottom:0"><label class="fl">Supabase Anon Key</label><input class="fi" type="password" id="OB_SB_KEY" placeholder="eyJhbGciOiJIUzI1NiI..."/></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ PROCESSING ═══════════════════ -->
+<div class="pov" id="POV">
+  <div class="pb-box">
+    <div style="font-size:48px;margin-bottom:14px">🤖</div>
+    <div class="pb-h">Claude is reading your PDF</div>
+    <div class="pb-msg" id="PMSG">Preparing…</div>
+    <div class="pb-bar"><div class="pb-f" id="PFILL" style="width:5%"></div></div>
+    <div style="font-size:11px;color:var(--slate);margin-top:5px" id="PPCT">5%</div>
+    <div style="font-size:11px;color:var(--bg5);margin-top:18px;line-height:1.7">Reads scanned pages via vision AI · Extracts 48 HFC KPIs</div>
+  </div>
+</div>
+
+<!-- Sync toast -->
+<div class="syncbar" id="SYNCBAR"></div>
+
+<!-- ═══════════════════ SHELL ═══════════════════ -->
+<div class="shell">
+  <aside class="sb" id="SIDEBAR">
+    <div class="sb-logo">
+      <div class="sb-name">HFC Intelligence</div>
+      <div class="sb-tag">Competitor Analytics</div>
+    </div>
+    <nav class="sb-nav">
+      <div class="sb-sep">Platform</div>
+      <button class="nb on" data-v="dashboard"><span class="nb-ic">◉</span> Dashboard</button>
+      <button class="nb" data-v="upload"><span class="nb-ic">↑</span> Upload & Extract</button>
+      <button class="nb" data-v="uploadkpi"><span class="nb-ic">✎</span> Manual KPI Entry</button>
+      <button class="nb" data-v="results"><span class="nb-ic">≡</span> Extracted Data <span class="nc" id="EXT_CNT" style="display:none">0</span></button>
+      <button class="nb" data-v="compare"><span class="nb-ic">⊞</span> Compare</button>
+      <button class="nb" data-v="trends"><span class="nb-ic">↗</span> Trends</button>
+      <button class="nb" data-v="ask"><span class="nb-ic">💬</span> Ask Your Data</button>
+      <button class="nb" data-v="mycompany"><span class="nb-ic">🏢</span> My Company vs Peers</button>
+      <button class="nb" data-v="alerts"><span class="nb-ic">🚨</span> Red Flag Alerts</button>
+      <button class="nb" data-v="concall"><span class="nb-ic">🎙</span> Concall Highlights</button>
+      <button class="nb" data-v="score"><span class="nb-ic">🎯</span> Positioning Score</button>
+      <button class="nb" data-v="boardpack"><span class="nb-ic">📋</span> Board Pack</button>
+      <div class="sb-sep">Config</div>
+      <button class="nb" data-v="settings"><span class="nb-ic">⚙</span> Settings & Sync</button>
+      <button class="nb" data-v="guide"><span class="nb-ic">?</span> Guide</button>
+    </nav>
+    <div class="sb-foot"><span>claude-sonnet-4-5 · 48 KPIs</span><br/><span id="SB_SYNC"><span class="sync-dot sync-off"></span>Local only</span></div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="tb-left">
+        <button class="hamburger" onclick="toggleSidebar()">☰</button>
+        <div>
+          <div class="tb-h" id="TB_TITLE">Dashboard</div>
+          <div class="tb-s" id="TB_SUB">HFC Intelligence · CXO Analytics</div>
+        </div>
+      </div>
+      <div class="tb-r">
+        <button class="btn out sm" id="CSV_BTN">↓ CSV</button>
+        <button class="btn out sm" id="PRINT_BTN" onclick="window.print()">🖨 Print</button>
+        <button class="btn gold sm" id="KEY_BTN">+ API Key</button>
+      </div>
+    </div>
+
+    <!-- ═══ DASHBOARD ═══ -->
+    <div class="page fu" id="P_dashboard">
+      <div style="margin-bottom:18px">
+        <h2 style="font-family:var(--display);font-size:24px;font-weight:600;color:var(--cream);margin-bottom:4px">Competitor Intelligence Hub</h2>
+        <p style="font-size:12.5px;color:var(--slate);max-width:560px">Upload investor presentations &amp; quarterly results from competing HFCs. Claude extracts 48 KPIs per document — including scanned PDFs.</p>
+      </div>
+      <div class="stats">
+        <div class="stat"><div class="sl">Documents</div><div class="sv" id="SD_DOCS">—</div><div class="ss">processed</div></div>
+        <div class="stat"><div class="sl">Companies</div><div class="sv" id="SD_COS">—</div><div class="ss">tracked</div></div>
+        <div class="stat"><div class="sl">Periods</div><div class="sv" id="SD_PER">—</div><div class="ss">quarters tracked</div></div>
+        <div class="stat"><div class="sl">Data Points</div><div class="sv" id="SD_PTS">—</div><div class="ss">extracted</div></div>
+      </div>
+      <div class="alert ai" id="D_DEMO_ALERT" style="display:none"><span>ℹ</span><span>Demo mode — add Claude API key in Settings. Free key at <strong>console.anthropic.com</strong></span></div>
+      <!-- Quick Upload Card — always visible -->
+      <div class="card" style="margin-bottom:14px;border:1.5px dashed rgba(246,197,85,.35);background:rgba(246,197,85,.03);cursor:pointer" onclick="go('upload')" id="D_QUICK_UPLOAD">
+        <div class="card-bd" style="padding:18px 20px">
+          <div style="display:flex;align-items:center;gap:14px">
+            <div style="width:44px;height:44px;border-radius:10px;background:rgba(246,197,85,.12);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">📥</div>
+            <div style="flex:1">
+              <div style="font-size:13.5px;font-weight:600;color:var(--cream);margin-bottom:3px">Upload a Competitor Document</div>
+              <div style="font-size:12px;color:var(--slate)">Investor deck · Quarterly results · Annual report · Scanned PDF — Claude extracts 48 KPIs instantly</div>
+            </div>
+            <div style="display:flex;gap:8px;flex-shrink:0">
+              <button class="btn gold sm" onclick="event.stopPropagation();go('upload')" style="white-space:nowrap">↑ Upload PDF</button>
+              <button class="btn out sm" onclick="event.stopPropagation();go('uploadkpi')" style="white-space:nowrap">✎ Manual Entry</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card hidden" id="D_TABLE">
+        <div class="card-hd"><div class="card-t">All Extractions</div><button class="btn out sm" onclick="go('results')">Manage →</button></div>
+        <div style="overflow-x:auto"><table class="tbl"><thead><tr><th>Company</th><th>Period</th><th>Type</th><th>AUM (Cr)</th><th>NIM %</th><th>GNPA %</th><th>Stage 3 %</th><th>CAR %</th><th>PAT (Cr)</th><th>RoA %</th><th></th></tr></thead><tbody id="D_TBODY"></tbody></table></div>
+      </div>
+      <div class="card hidden" id="D_EMPTY"><div class="card-bd"><div class="empty"><div class="ei">📄</div><div class="eh">No documents yet</div><p class="ep">Upload your first competitor PDF to begin</p><button class="btn gold" onclick="go('upload')">↑ Upload First Document</button></div></div></div>
+    </div>
+
+    <!-- ═══ UPLOAD ═══ -->
+    <div class="page fu hidden" id="P_upload">
+      <div id="U_ALERT"></div>
+
+      <!-- STEP 1 -->
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <div style="width:26px;height:26px;border-radius:50%;background:var(--gold);color:#08091A;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">1</div>
+        <div style="font-size:13px;font-weight:600;color:var(--cream)">Document Details</div>
+      </div>
+      <div class="card" style="margin-bottom:20px">
+        <div class="card-bd">
+          <div class="frow">
+            <div class="fg"><label class="fl">Competitor Company *</label><input class="fi" id="INP_CO" placeholder="e.g. Aavas, Can Fin, PNB Housing, LIC HFL"/></div>
+            <div class="fg"><label class="fl">Document Type</label><select class="fi" id="INP_DT" onchange="autoSelectModel()"><option value="investor_presentation">Investor Presentation</option><option value="quarterly_results">Quarterly Financial Results</option><option value="annual_report">Annual Report</option><option value="credit_rating">Credit Rating Report</option><option value="concall_transcript">Concall Transcript</option></select></div>
+          </div>
+          <div class="frow">
+            <div class="fg">
+              <label class="fl">Reporting Period <span style="text-transform:none;color:var(--bg5);font-weight:400">— auto-detected if blank</span></label>
+              <input class="fi" id="INP_PER" placeholder="e.g. Q3 FY25, H1 FY25, FY2024"/>
+            </div>
+            <div class="fg">
+              <label class="fl">AI Model</label>
+              <select class="fi" id="INP_MODEL" onchange="updateModelHint()">
+                <option value="claude-sonnet-4-5">⚡ Sonnet — Digital PDFs (~₹2–5/doc)</option>
+                <option value="claude-opus-4-5">🔬 Opus — Scanned / Annual reports (~₹15–30/doc)</option>
+              </select>
+              <div id="MODEL_HINT" style="margin-top:5px;font-size:11px;color:var(--green)">⚡ Best for clean digital PDFs — fast and cost-effective</div>
+            </div>
+          </div>
+          <div class="fg" style="margin-bottom:0">
+            <label class="fl">Analyst Notes <span style="text-transform:none;color:var(--bg5);font-weight:400">— optional</span></label>
+            <textarea class="fi fi-ta" id="INP_NOTES" placeholder="e.g. Management guided 18-20% AUM growth; watch NIM compression in H2…" style="min-height:56px"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 2 -->
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <div style="width:26px;height:26px;border-radius:50%;background:var(--gold);color:#08091A;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">2</div>
+        <div style="font-size:13px;font-weight:600;color:var(--cream)">Upload PDF</div>
+        <span class="bdg bgold" style="margin-left:4px">Digital + Scanned</span>
+      </div>
+      <div class="card" style="margin-bottom:20px">
+        <div class="card-bd">
+          <div class="dz" id="DZ">
+            <input type="file" accept=".pdf" id="FI" multiple/>
+            <div style="font-size:32px;margin-bottom:8px;opacity:.7">📥</div>
+            <div style="font-size:14px;font-weight:600;color:var(--cream);margin-bottom:4px">Drop PDF here or click to browse</div>
+            <div style="font-size:12px;color:var(--slate);line-height:1.7">✓ Digital PDFs &nbsp;·&nbsp; ✓ Scanned image PDFs &nbsp;·&nbsp; ✓ Annual reports (200+ pages)<br/>Investor presentations · Quarterly results · Rating reports</div>
+          </div>
+          <div id="FILE_LIST"></div>
+        </div>
+      </div>
+
+      <!-- STEP 3 -->
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <div style="width:26px;height:26px;border-radius:50%;background:var(--gold);color:#08091A;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">3</div>
+        <div style="font-size:13px;font-weight:600;color:var(--cream)">Select KPI Fields</div>
+      </div>
+      <div class="card" style="margin-bottom:20px">
+        <div class="card-hd">
+          <div class="card-t" style="font-size:12px;color:var(--slate);font-weight:400">Choose which of the 48 KPIs to extract — or keep all selected</div>
+          <div style="display:flex;gap:6px;align-items:center">
+            <button class="btn ghost sm" id="SEL_ALL">All</button>
+            <button class="btn ghost sm" id="SEL_NONE">None</button>
+            <span class="bdg bgold" id="SEL_CNT">48 selected</span>
+          </div>
+        </div>
+        <div class="card-bd" id="FPICKER"></div>
+      </div>
+
+      <!-- EXTRACT -->
+      <div style="display:flex;gap:10px;justify-content:flex-end;align-items:center">
+        <p style="font-size:12px;color:var(--slate);margin-right:auto;max-width:400px;line-height:1.5" id="U_NOTE"></p>
+        <button class="btn gold" style="padding:10px 28px;font-size:13.5px;font-weight:700" id="EXTRACT_BTN" disabled>🚀 Extract KPIs with Claude</button>
+      </div>
+    </div>
+
+    <!-- ═══ SUCCESS ═══ -->
+    <div class="page fu hidden" id="P_success">
+      <div class="card" id="SUCCESS_CONTENT"></div>
+    </div>
+
+    <!-- ═══ MANUAL KPI ENTRY ═══ -->
+    <div class="page fu hidden" id="P_uploadkpi">
+      <div style="margin-bottom:18px">
+        <h2 style="font-family:var(--display);font-size:24px;font-weight:600;color:var(--cream);margin-bottom:4px">Manual KPI Entry</h2>
+        <p style="font-size:12.5px;color:var(--slate);max-width:600px">Build your historical repository without PDFs. Enter KPIs directly for any company and period — spreadsheet data, memory, or past reports.</p>
+      </div>
+      <div id="MKE_ALERT"></div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-hd"><div class="card-t">Company & Period</div></div>
+        <div class="card-bd">
+          <div class="frow">
+            <div class="fg"><label class="fl">Company Name *</label><input class="fi" id="MKE_CO" placeholder="e.g. ABHFL, PNB Housing, Tata Capital Housing"/></div>
+            <div class="fg"><label class="fl">Reporting Period *</label><input class="fi" id="MKE_PER" placeholder="e.g. Q2 FY23, H1 FY24, FY2022"/></div>
+          </div>
+          <div class="fg" style="margin-bottom:12px">
+            <label class="fl">Document Type</label>
+            <select class="fi" id="MKE_DT">
+              <option value="investor_presentation">Investor Presentation</option>
+              <option value="quarterly_results">Quarterly Financial Results</option>
+              <option value="annual_report">Annual Report</option>
+              <option value="manual_entry">Manual Entry / Repository</option>
+            </select>
+          </div>
+          <div style="background:var(--bg3);border-radius:10px;padding:14px 16px;border:1px solid var(--edge)">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+              <div>
+                <div style="font-size:13px;font-weight:600;color:var(--cream);margin-bottom:3px">🌐 Search Web for KPIs</div>
+                <div style="font-size:11.5px;color:var(--slate);line-height:1.5">Claude searches BSE filings, NSE, investor pages &amp; press releases.<br/>Best-effort — always verify before using.</div>
+              </div>
+              <button class="btn gold" id="MKE_WEB_BTN" style="white-space:nowrap;flex-shrink:0">🌐 Search &amp; Auto-Fill</button>
+            </div>
+            <div id="MKE_WEB_STATUS" class="hidden" style="margin-top:10px">
+              <div class="pb-bar"><div class="pb-f" id="MKE_WEB_PROG" style="width:10%"></div></div>
+              <div style="font-size:11.5px;color:var(--slate);margin-top:6px" id="MKE_WEB_MSG">Searching…</div>
+            </div>
+            <div id="MKE_WEB_RESULT"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-hd">
+          <div class="card-t">KPI Values</div>
+          <div style="display:flex;gap:6px;align-items:center">
+            <input class="fi" id="MKE_SEARCH" placeholder="Search KPIs…" style="width:160px;padding:5px 10px;font-size:12px"/>
+            <div style="display:flex;gap:4px;flex-wrap:wrap" id="MKE_CAT_FILTERS"></div>
+          </div>
+        </div>
+        <div class="card-bd">
+          <div id="MKE_FIELDS_GRID" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px"></div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-hd"><div class="card-t">📋 Bulk Paste (Optional)</div><span class="bdg bs">CSV format</span></div>
+        <div class="card-bd">
+          <p style="font-size:12px;color:var(--slate);margin-bottom:10px;line-height:1.6">Paste data in <strong style="color:var(--cream)">KPI Name, Value</strong> format (one per line). Claude will match KPI names to the fields automatically.</p>
+          <textarea class="fi fi-ta" id="MKE_PASTE" placeholder="AUM, 18240&#10;NIM, 5.82&#10;GNPA, 1.12&#10;RoA, 3.2&#10;CAR, 38.2" style="min-height:100px;font-family:var(--mono);font-size:12px"></textarea>
+          <button class="btn out sm" style="margin-top:8px" id="MKE_PARSE_BTN">⚡ Parse & Fill Fields</button>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button class="btn out" onclick="clearMKE()">Clear All</button>
+        <button class="btn gold" style="padding:10px 28px" id="MKE_SAVE_BTN">💾 Save to Repository</button>
+      </div>
+    </div>
+
+    <!-- ═══ ASK ═══ -->
+    <div class="page fu hidden" id="P_ask">
+      <div style="margin-bottom:18px">
+        <h2 style="font-family:var(--display);font-size:24px;font-weight:600;color:var(--cream);margin-bottom:4px">Ask Your Data</h2>
+        <p style="font-size:12.5px;color:var(--slate);max-width:560px">Ask any question about your extracted competitor data in plain English. Claude reads all your extractions and answers instantly.</p>
+      </div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-bd">
+          <div style="display:flex;gap:8px;align-items:flex-start">
+            <textarea class="fi fi-ta" id="ASK_INPUT" placeholder="e.g. What was the rank of ABHFL in disbursements in Q2 FY25? Who were the companies above it?&#10;e.g. Which company had the lowest GNPA last quarter?&#10;e.g. Compare NIM trends for Aavas and Can Fin across all periods" style="min-height:80px;flex:1;resize:none"></textarea>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+            <button class="btn gold" id="ASK_BTN" style="padding:9px 22px">Ask Claude →</button>
+            <button class="btn out sm" onclick="askSample(this)" data-q="Which company had the best GNPA in the latest quarter?">Sample: GNPA rank</button>
+            <button class="btn out sm" onclick="askSample(this)" data-q="Rank all companies by AUM for the latest available period">Sample: AUM ranking</button>
+            <button class="btn out sm" onclick="askSample(this)" data-q="Which company had the highest NIM and what was it?">Sample: Best NIM</button>
+            <button class="btn out sm" onclick="askSample(this)" data-q="Show me disbursement trends across all companies and periods">Sample: Disb. trends</button>
+          </div>
+        </div>
+      </div>
+      <div id="ASK_THINKING" class="hidden">
+        <div style="display:flex;align-items:center;gap:10px;padding:16px 20px;background:var(--bg2);border:1px solid var(--edge);border-radius:10px;margin-bottom:14px">
+          <div style="font-size:20px">🤔</div>
+          <div>
+            <div style="font-size:13px;font-weight:500;color:var(--cream)">Claude is analysing your data…</div>
+            <div style="font-size:11px;color:var(--slate);margin-top:2px" id="ASK_STATUS">Reading extractions…</div>
+          </div>
+          <div class="pb-bar" style="flex:1;margin:0 0 0 10px"><div class="pb-f" id="ASK_PROG" style="width:20%"></div></div>
+        </div>
+      </div>
+      <div id="ASK_HISTORY"></div>
+    </div>
+
+    <!-- ═══ RESULTS ═══ -->
+    <div class="page fu hidden" id="P_results">
+      <div class="search-bar">
+        <span style="color:var(--slate);font-size:14px">🔍</span>
+        <input type="text" id="SEARCH_IN" placeholder="Filter by company, period, or keyword…" oninput="filterResults()"/>
+        <button class="btn ghost sm" onclick="document.getElementById('SEARCH_IN').value='';filterResults()">✕</button>
+      </div>
+      <div id="RES_TABS" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px"></div>
+      <div id="RES_CONTENT"></div>
+    </div>
+
+    <!-- ═══ COMPARE ═══ -->
+    <div class="page fu hidden" id="P_compare">
+      <div id="CMP_ALERT"></div>
+      <div style="display:grid;grid-template-columns:1fr auto;gap:16px;align-items:start;margin-bottom:14px">
+        <div>
+          <div style="font-size:9.5px;color:var(--slate);text-transform:uppercase;letter-spacing:1px;font-weight:600;margin-bottom:7px">Reporting Period</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap" id="CMP_PERIODS"></div>
+        </div>
+        <div>
+          <div style="font-size:9.5px;color:var(--slate);text-transform:uppercase;letter-spacing:1px;font-weight:600;margin-bottom:7px">Options</div>
+          <div style="display:flex;gap:6px">
+            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;color:var(--slate)"><input type="checkbox" id="BENCH_TOGGLE" onchange="renderCompare()"/> Industry benchmarks</label>
+            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;color:var(--slate)"><input type="checkbox" id="HEAT_TOGGLE" checked onchange="renderCompare()"/> Heat map</label>
+          </div>
+        </div>
+      </div>
+      <div style="font-size:9.5px;color:var(--slate);text-transform:uppercase;letter-spacing:1px;font-weight:600;margin-bottom:7px">KPI Category</div>
+      <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:14px" id="CMP_CATS"></div>
+      <div id="CMP_RADAR_ROW"></div>
+      <div class="card" style="margin-bottom:0">
+        <div class="card-hd">
+          <div class="card-t" id="CMP_TITLE">Comparison</div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <div style="font-size:10.5px;color:var(--slate)"><span style="color:var(--green)">▲ Best</span> &nbsp;·&nbsp; <span style="color:var(--red)">▼ Worst</span> &nbsp;·&nbsp; <span style="color:var(--gold)">★ Benchmark</span></div>
+            <button class="btn out sm" id="CMP_CSV">↓ CSV</button>
+          </div>
+        </div>
+        <div style="overflow-x:auto" id="CMP_BODY"></div>
+      </div>
+    </div>
+
+    <!-- ═══ TRENDS ═══ -->
+    <div class="page fu hidden" id="P_trends">
+      <div style="margin-bottom:16px">
+        <div style="font-size:9.5px;color:var(--slate);text-transform:uppercase;letter-spacing:1px;font-weight:600;margin-bottom:8px">Select Company</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap" id="TREND_COS"></div>
+      </div>
+      <div id="TREND_CONTENT"></div>
+    </div>
+
+    <!-- ═══ MY COMPANY VS PEERS ═══ -->
+    <div class="page fu hidden" id="P_mycompany">
+      <div style="margin-bottom:18px">
+        <h2 style="font-family:var(--display);font-size:24px;font-weight:600;color:var(--cream);margin-bottom:4px">My Company vs Peers</h2>
+        <p style="font-size:12.5px;color:var(--slate);max-width:560px">Upload your own quarterly results to see exactly where you stand in the peer group across all 48 KPIs.</p>
+      </div>
+      <div id="MC_ALERT"></div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-hd"><div class="card-t">Upload Your Results</div><span class="bdg bp">Your Company</span></div>
+        <div class="card-bd">
+          <div class="frow" style="margin-bottom:12px">
+            <div class="fg"><label class="fl">Your Company Name *</label><input class="fi" id="MC_CO" placeholder="e.g. Home First Finance, Aptus Value Housing"/></div>
+            <div class="fg"><label class="fl">Reporting Period *</label><input class="fi" id="MC_PER" placeholder="e.g. Q3 FY25"/></div>
+          </div>
+          <div class="dz" id="MC_DZ" style="padding:24px">
+            <input type="file" accept=".pdf" id="MC_FI"/>
+            <div style="font-size:22px;margin-bottom:6px;opacity:.7">📄</div>
+            <div style="font-size:13px;font-weight:600;color:var(--cream);margin-bottom:3px">Drop your results PDF here</div>
+            <div style="font-size:11px;color:var(--slate)">Quarterly results, investor presentation, or annual report</div>
+          </div>
+          <div id="MC_FILE"></div>
+          <div style="margin-top:12px;display:flex;gap:8px;justify-content:flex-end">
+            <button class="btn gold" id="MC_BTN" disabled>🏢 Extract & Compare →</button>
+          </div>
+        </div>
+      </div>
+      <div id="MC_RESULT"></div>
+    </div>
+
+    <!-- ═══ RED FLAG ALERTS ═══ -->
+    <div class="page fu hidden" id="P_alerts">
+      <div style="margin-bottom:18px">
+        <h2 style="font-family:var(--display);font-size:24px;font-weight:600;color:var(--cream);margin-bottom:4px">Red Flag & Green Flag Alerts</h2>
+        <p style="font-size:12.5px;color:var(--slate);max-width:560px">Claude analyses all your extractions and surfaces concerning deteriorations and positive improvements across the peer group.</p>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:16px">
+        <button class="btn gold" id="ALERTS_BTN">🔍 Analyse All Data</button>
+        <button class="btn out sm" id="ALERTS_REFRESH" style="display:none">↻ Refresh</button>
+      </div>
+      <div id="ALERTS_THINKING" class="hidden">
+        <div style="display:flex;align-items:center;gap:10px;padding:16px 20px;background:var(--bg2);border:1px solid var(--edge);border-radius:10px;margin-bottom:14px">
+          <div style="font-size:20px">🔍</div>
+          <div style="flex:1"><div style="font-size:13px;font-weight:500;color:var(--cream)">Scanning for red flags and green flags…</div>
+          <div class="pb-bar" style="margin:8px 0 0"><div class="pb-f" id="ALERTS_PROG" style="width:10%"></div></div></div>
+        </div>
+      </div>
+      <div id="ALERTS_RESULT"></div>
+    </div>
+
+    <!-- ═══ CONCALL HIGHLIGHTS ═══ -->
+    <div class="page fu hidden" id="P_concall">
+      <div style="margin-bottom:18px">
+        <h2 style="font-family:var(--display);font-size:24px;font-weight:600;color:var(--cream);margin-bottom:4px">Concall Highlights Extractor</h2>
+        <p style="font-size:12.5px;color:var(--slate);max-width:560px">Upload any competitor concall transcript or earnings call PDF. Claude extracts management guidance, key quotes, growth outlook, and analyst concerns.</p>
+      </div>
+      <div id="CC_ALERT"></div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-hd"><div class="card-t">Upload Concall Transcript</div><span class="bdg bb">PDF or Text</span></div>
+        <div class="card-bd">
+          <div class="frow" style="margin-bottom:12px">
+            <div class="fg"><label class="fl">Company *</label><input class="fi" id="CC_CO" placeholder="e.g. Aavas Financiers"/></div>
+            <div class="fg"><label class="fl">Period</label><input class="fi" id="CC_PER" placeholder="e.g. Q3 FY25"/></div>
+          </div>
+          <div class="dz" id="CC_DZ" style="padding:24px">
+            <input type="file" accept=".pdf" id="CC_FI"/>
+            <div style="font-size:22px;margin-bottom:6px;opacity:.7">🎙</div>
+            <div style="font-size:13px;font-weight:600;color:var(--cream);margin-bottom:3px">Drop concall transcript PDF here</div>
+            <div style="font-size:11px;color:var(--slate)">Earnings call transcript · Management commentary · Analyst Q&A</div>
+          </div>
+          <div id="CC_FILE"></div>
+          <div style="margin-top:12px;display:flex;gap:8px;justify-content:flex-end">
+            <button class="btn gold" id="CC_BTN" disabled>🎙 Extract Highlights →</button>
+          </div>
+        </div>
+      </div>
+      <div id="CC_RESULT"></div>
+    </div>
+
+    <!-- ═══ POSITIONING SCORE ═══ -->
+    <div class="page fu hidden" id="P_score">
+      <div style="margin-bottom:18px">
+        <h2 style="font-family:var(--display);font-size:24px;font-weight:600;color:var(--cream);margin-bottom:4px">Strategic Positioning Score</h2>
+        <p style="font-size:12.5px;color:var(--slate);max-width:560px">Composite 100-point score per company across 6 strategic dimensions. Instant CEO-level view of peer positioning.</p>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:16px;align-items:center">
+        <div style="font-size:9.5px;color:var(--slate);text-transform:uppercase;letter-spacing:1px;font-weight:600">Period</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap" id="SCORE_PERIODS"></div>
+        <button class="btn gold sm" id="SCORE_BTN" style="margin-left:auto">🎯 Calculate Scores</button>
+      </div>
+      <div id="SCORE_THINKING" class="hidden">
+        <div style="display:flex;align-items:center;gap:10px;padding:16px 20px;background:var(--bg2);border:1px solid var(--edge);border-radius:10px;margin-bottom:14px">
+          <div style="font-size:20px">🎯</div>
+          <div style="flex:1"><div style="font-size:13px;font-weight:500;color:var(--cream)">Claude is scoring all companies…</div>
+          <div class="pb-bar" style="margin:8px 0 0"><div class="pb-f" id="SCORE_PROG" style="width:10%"></div></div></div>
+        </div>
+      </div>
+      <div id="SCORE_RESULT"></div>
+    </div>
+
+    <!-- ═══ BOARD PACK ═══ -->
+    <div class="page fu hidden" id="P_boardpack">
+      <div style="margin-bottom:18px">
+        <h2 style="font-family:var(--display);font-size:24px;font-weight:600;color:var(--cream);margin-bottom:4px">Board Pack Generator</h2>
+        <p style="font-size:12.5px;color:var(--slate);max-width:560px">Generate a ready-to-use competitive intelligence narrative for your board pack. Select period and your company, Claude writes the full commentary.</p>
+      </div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-hd"><div class="card-t">Configure Report</div></div>
+        <div class="card-bd">
+          <div class="frow">
+            <div class="fg">
+              <label class="fl">Your Company Name</label>
+              <input class="fi" id="BP_CO" placeholder="e.g. Home First Finance Company"/>
+            </div>
+            <div class="fg">
+              <label class="fl">Reporting Period</label>
+              <select class="fi" id="BP_PER"><option value="">— Select period —</option></select>
+            </div>
+          </div>
+          <div class="fg">
+            <label class="fl">Tone</label>
+            <select class="fi" id="BP_TONE">
+              <option value="board">Board Pack — formal, third person, concise</option>
+              <option value="management">Management Review — direct, action-oriented</option>
+              <option value="investor">Investor Communication — positive framing, growth focus</option>
+            </select>
+          </div>
+          <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:4px">
+            <button class="btn gold" id="BP_BTN">📋 Generate Board Commentary →</button>
+          </div>
+        </div>
+      </div>
+      <div id="BP_THINKING" class="hidden">
+        <div style="display:flex;align-items:center;gap:10px;padding:16px 20px;background:var(--bg2);border:1px solid var(--edge);border-radius:10px;margin-bottom:14px">
+          <div style="font-size:20px">✍️</div>
+          <div style="flex:1"><div style="font-size:13px;font-weight:500;color:var(--cream)">Claude is writing your board commentary…</div>
+          <div class="pb-bar" style="margin:8px 0 0"><div class="pb-f" id="BP_PROG" style="width:10%"></div></div></div>
+        </div>
+      </div>
+      <div id="BP_RESULT"></div>
+    </div>
+
+    <!-- ═══ SETTINGS ═══ -->
+    <div class="page fu hidden" id="P_settings">
+      <div style="max-width:680px">
+        <div class="card">
+          <div class="card-hd"><div class="card-t">🔑 Claude API Key</div><span class="bdg" id="KEY_STATUS">Not set</span></div>
+          <div class="card-bd" id="SETTINGS_KEY_BODY">
+            <div class="fg"><label class="fl">API Key</label><input class="fi" type="password" id="SET_KEY" placeholder="sk-ant-api03-..."/></div>
+            <div style="display:flex;gap:8px"><button class="btn gold" id="SET_KEY_SAVE">Save Key</button><button class="btn danger sm" id="SET_KEY_CLR">Clear</button></div>
+            <p style="font-size:11px;color:var(--slate);margin-top:10px;line-height:1.6">Free key at <code>console.anthropic.com</code> → API Keys. Stored in browser only, sent directly to Anthropic.</p>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><div class="card-t">🔄 Supabase Sync</div><span class="bdg" id="SB_STATUS">Not configured</span></div>
+          <div class="card-bd" id="SETTINGS_SB_BODY">
+            <div class="alert ai" style="margin-bottom:14px"><span>ℹ</span><span style="font-size:12px">Once configured, all extractions sync to Supabase. Anyone sharing this URL with the same Supabase config sees identical data in real time.</span></div>
+            <div class="fg"><label class="fl">Supabase Project URL</label><input class="fi" id="SET_SB_URL" placeholder="https://xxxx.supabase.co"/></div>
+            <div class="fg"><label class="fl">Supabase Anon Key</label><input class="fi" type="password" id="SET_SB_KEY" placeholder="eyJhbGciOiJIUzI1NiI..."/></div>
+            <div style="display:flex;gap:8px"><button class="btn gold" id="SB_SAVE">Save & Connect</button><button class="btn danger sm" id="SB_CLR">Disconnect</button></div>
+            <div class="sbox" style="margin-top:14px">
+              <div style="font-size:10px;color:var(--gold);text-transform:uppercase;letter-spacing:1px;font-weight:600;margin-bottom:10px">One-time Supabase Setup</div>
+              <div class="sr"><div class="sn">1</div><div class="st">Go to <code>supabase.com</code> → New project (free tier)</div></div>
+              <div class="sr"><div class="sn">2</div><div class="st">SQL Editor → run the schema shown in Guide → Execute</div></div>
+              <div class="sr"><div class="sn">3</div><div class="st">Settings → API → copy Project URL &amp; anon key above</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><div class="card-t">🗑 Data Management</div></div>
+          <div class="card-bd">
+            <p style="font-size:12.5px;color:var(--slate);margin-bottom:14px;line-height:1.6">Clear all locally stored data. Does not affect Supabase.</p>
+            <button class="btn danger" id="CLEAR_ALL">Clear All Local Data</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><div class="card-t">💰 API Usage</div><span class="bdg bgold" id="USAGE_BADGE">₹0 est.</span></div>
+          <div class="card-bd">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+              <div style="background:var(--bg3);border-radius:8px;padding:14px 16px">
+                <div style="font-size:9.5px;color:var(--slate);text-transform:uppercase;letter-spacing:1px;font-weight:600;margin-bottom:6px">Documents Processed</div>
+                <div style="font-family:var(--mono);font-size:22px;color:var(--cream)" id="USAGE_DOCS">0</div>
+              </div>
+              <div style="background:var(--bg3);border-radius:8px;padding:14px 16px">
+                <div style="font-size:9.5px;color:var(--slate);text-transform:uppercase;letter-spacing:1px;font-weight:600;margin-bottom:6px">Est. Total Cost</div>
+                <div style="font-family:var(--mono);font-size:22px;color:var(--gold)" id="USAGE_COST">₹0</div>
+              </div>
+            </div>
+            <div style="font-size:11px;color:var(--slate);line-height:1.8">
+              Estimate based on ~₹8 avg per document · Actual cost visible at <strong style="color:var(--gold)">console.anthropic.com → Usage</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ GUIDE ═══ -->
+    <div class="page fu hidden" id="P_guide">
+      <div style="max-width:760px">
+        <div class="alert ao">✓ Zero server hosting cost. Only pay Anthropic API usage (~₹2–10 per PDF).</div>
+        <div class="card"><div class="card-hd"><div class="card-t">⚡ Deploy to GitHub Pages</div></div>
+          <div class="card-bd">
+            <div class="sr"><div class="sn">1</div><div class="st">Download <code>index.html</code> from this conversation</div></div>
+            <div class="sr"><div class="sn">2</div><div class="st">GitHub repo → click <code>index.html</code> → pencil icon → select all → paste → Commit</div></div>
+            <div class="sr"><div class="sn">3</div><div class="st">Wait 1–2 min → refresh your GitHub Pages URL</div></div>
+            <div class="sr"><div class="sn">4</div><div class="st">Settings → add API key → optionally configure Supabase for team sharing</div></div>
+          </div>
+        </div>
+        <div class="card"><div class="card-hd"><div class="card-t">🗄 Supabase SQL Schema</div></div>
+          <div class="card-bd">
+            <div class="cb">create table if not exists hfc_extractions (
+  id text primary key,
+  company text,
+  period text,
+  doc_type text,
+  file_name text,
+  tokens integer default 0,
+  is_demo boolean default false,
+  notes text,
+  data jsonb,
+  created_at timestamptz default now()
+);
+alter table hfc_extractions enable row level security;
+create policy "public_all" on hfc_extractions
+  for all using (true) with check (true);</div>
+          </div>
+        </div>
+        <div class="card"><div class="card-hd"><div class="card-t">💰 Cost Estimate</div></div>
+          <div class="card-bd">
+            <div class="cr"><span style="color:var(--slate)">Investor deck (10–20 pages)</span><span style="font-family:var(--mono);font-size:12px;color:var(--gold)">~₹2–5</span></div>
+            <div class="cr"><span style="color:var(--slate)">Quarterly results (30–50 pages)</span><span style="font-family:var(--mono);font-size:12px;color:var(--gold)">~₹5–12</span></div>
+            <div class="cr"><span style="color:var(--slate)">Annual report (100–200 pages)</span><span style="font-family:var(--mono);font-size:12px;color:var(--gold)">~₹15–30</span></div>
+            <div class="cr"><span style="color:var(--slate)">50 docs/month</span><span style="font-family:var(--mono);font-size:12px;color:var(--gold)">~₹250–600/month</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /shell -->
+
+<script>
+/* ════════════════════════════════════════════════
+   SUPABASE — these are safe to commit publicly
+   Claude API key is stored in Supabase config table
+   and fetched at runtime — never in this file
+   ════════════════════════════════════════════════ */
+const CONFIG = {
+  CLAUDE_KEY:    "",  // fetched from Supabase at startup — do not fill this
+  SUPABASE_URL:  "https://ftojirkyfrzcddwzazmm.supabase.co",
+  SUPABASE_KEY:  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0b2ppcmt5ZnJ6Y2Rkd3phem1tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4ODc4NDQsImV4cCI6MjA4ODQ2Mzg0NH0.uiC357NueJGHswVwK7uub3EZ7nzYqdB95Z0SS9it9ig",
+};
+
+/* ════════════════════════════════════════════════
+   FIELD DEFINITIONS — 48 HFC KPIs
+   ════════════════════════════════════════════════ */
+const FIELDS = [
+  {k:"period",l:"Reporting Period",u:"",c:"Meta"},
+  // Portfolio
+  {k:"aum",l:"AUM / Loan Book",u:"INR Cr",c:"Portfolio"},
+  {k:"hl_mix",l:"Home Loan Mix",u:"%",c:"Portfolio"},
+  {k:"lap_mix",l:"LAP Mix",u:"%",c:"Portfolio"},
+  {k:"cf_mix",l:"Construction Finance Mix",u:"%",c:"Portfolio"},
+  {k:"affordable_mix",l:"Affordable Housing Mix",u:"%",c:"Portfolio"},
+  {k:"individual_mix",l:"Individual Loan Mix",u:"%",c:"Portfolio"},
+  {k:"portfolio_yield",l:"Portfolio Yield",u:"%",c:"Portfolio"},
+  {k:"floating_mix",l:"Floating Rate Mix",u:"%",c:"Portfolio"},
+  {k:"avg_tenor",l:"Avg Loan Tenor",u:"Yrs",c:"Portfolio"},
+  {k:"salaried_mix",l:"Salaried Mix",u:"%",c:"Portfolio"},
+  {k:"ltv_aum",l:"LTV on AUM",u:"%",c:"Portfolio"},
+  {k:"bt_out",l:"BT Out Rate (Ann.)",u:"%",c:"Portfolio",lob:1},
+  {k:"avg_ticket",l:"Avg Ticket (Portfolio)",u:"INR Lakh",c:"Portfolio"},
+  // Asset Quality
+  {k:"gnpa",l:"GNPA",u:"%",c:"Asset Quality",lob:1},
+  {k:"nnpa",l:"NNPA",u:"%",c:"Asset Quality",lob:1},
+  {k:"gnpa_hl",l:"GNPA — Home Loan",u:"%",c:"Asset Quality",lob:1},
+  {k:"gnpa_lap",l:"GNPA — LAP",u:"%",c:"Asset Quality",lob:1},
+  {k:"stage1_pct",l:"Stage 1 %",u:"%",c:"Asset Quality"},
+  {k:"stage2_pct",l:"Stage 2 %",u:"%",c:"Asset Quality",lob:1},
+  {k:"stage3_pct",l:"Stage 3 %",u:"%",c:"Asset Quality",lob:1},
+  {k:"dpd30",l:"30+ DPD",u:"%",c:"Asset Quality",lob:1},
+  {k:"dpd90",l:"90+ DPD",u:"%",c:"Asset Quality",lob:1},
+  {k:"ecl_pct",l:"ECL Provision %",u:"%",c:"Asset Quality"},
+  {k:"credit_cost",l:"Credit Cost",u:"%",c:"Asset Quality",lob:1},
+  // Disbursements
+  {k:"disbursements",l:"Disbursements (Qtr)",u:"INR Cr",c:"Disbursements"},
+  {k:"disb_hl_mix",l:"Disb. HL Mix",u:"%",c:"Disbursements"},
+  {k:"disb_lap_mix",l:"Disb. LAP Mix",u:"%",c:"Disbursements"},
+  {k:"disb_yield",l:"Disbursement Yield",u:"%",c:"Disbursements"},
+  {k:"disb_salaried",l:"Disb. Salaried Mix",u:"%",c:"Disbursements"},
+  {k:"disb_cibil_750p",l:"Disb. CIBIL >750",u:"%",c:"Disbursements"},
+  {k:"avg_ticket_disb",l:"Avg Ticket (Disb.)",u:"INR Lakh",c:"Disbursements"},
+  // Profitability
+  {k:"nim",l:"Net Interest Margin",u:"%",c:"Profitability"},
+  {k:"spread",l:"Spread",u:"%",c:"Profitability"},
+  {k:"yield_adv",l:"Yield on Advances",u:"%",c:"Profitability"},
+  {k:"cof",l:"Cost of Funds",u:"%",c:"Profitability",lob:1},
+  {k:"roa",l:"Return on Assets",u:"%",c:"Profitability"},
+  {k:"roe",l:"Return on Equity",u:"%",c:"Profitability"},
+  {k:"pat",l:"Profit After Tax",u:"INR Cr",c:"Profitability"},
+  {k:"nii",l:"Net Interest Income",u:"INR Cr",c:"Profitability"},
+  {k:"cost_income",l:"Cost-to-Income",u:"%",c:"Profitability",lob:1},
+  // Capital & Borrowings
+  {k:"car",l:"CAR / CRAR",u:"%",c:"Capital"},
+  {k:"tier1",l:"Tier 1 Capital",u:"%",c:"Capital"},
+  {k:"lcr",l:"LCR",u:"%",c:"Capital"},
+  {k:"pbc_hl",l:"PBC — Individual HL",u:"%",c:"Capital"},
+  {k:"total_borrowings",l:"Total Borrowings",u:"INR Cr",c:"Capital"},
+  {k:"incr_cob",l:"Incremental CoB",u:"%",c:"Capital",lob:1},
+  {k:"avg_tenor_borrow",l:"Avg Tenor Borrowings",u:"Months",c:"Capital"},
+  // Operations
+  {k:"branches",l:"Branches",u:"",c:"Operations"},
+  {k:"employees",l:"Employees",u:"",c:"Operations"},
+  {k:"coll_efficiency",l:"Collection Efficiency",u:"%",c:"Operations"},
+  {k:"digital_collection",l:"Digital Collections",u:"%",c:"Operations"},
+  {k:"growth_yoy",l:"AUM Growth YoY",u:"%",c:"Operations"},
+];
+
+const CATS = [...new Set(FIELDS.filter(f=>f.c!=="Meta").map(f=>f.c))];
+const LOB = new Set(FIELDS.filter(f=>f.lob).map(f=>f.k)); // lower is better
+
+/* Industry benchmarks (sector medians, approximate) */
+const BENCH = {
+  aum:{value:25000,label:"Industry Median"},
+  hl_mix:{value:86,label:"Industry Median"},
+  portfolio_yield:{value:11.2,label:"Industry Median"},
+  gnpa:{value:2.1,label:"Industry Median"},
+  nnpa:{value:1.2,label:"Industry Median"},
+  stage3_pct:{value:2.1,label:"Industry Median"},
+  nim:{value:4.2,label:"Industry Median"},
+  spread:{value:2.6,label:"Industry Median"},
+  cof:{value:8.1,label:"Industry Median"},
+  roa:{value:2.1,label:"Industry Median"},
+  roe:{value:14.5,label:"Industry Median"},
+  cost_income:{value:28,label:"Industry Median"},
+  car:{value:22,label:"Industry Median"},
+  coll_efficiency:{value:98.5,label:"Industry Median"},
+  growth_yoy:{value:15,label:"Industry Median"},
+  credit_cost:{value:0.35,label:"Industry Median"},
+  disbursements:{value:2800,label:"Industry Median"},
+};
+
+/* ════════════════════════════════════════════════
+   DEMO DATA
+   ════════════════════════════════════════════════ */
+const DEMO_RAW = [
+  {co:"Aavas Financiers",periods:["Q3 FY25","Q2 FY25"],data:[
+    {period:"Q3 FY25",aum:18240,hl_mix:88.2,lap_mix:8.1,cf_mix:null,affordable_mix:74,individual_mix:99.8,portfolio_yield:13.1,floating_mix:92,avg_tenor:16.2,salaried_mix:56,ltv_aum:52.1,bt_out:6.8,avg_ticket:12.4,gnpa:1.12,nnpa:0.61,gnpa_hl:0.98,gnpa_lap:2.41,stage1_pct:97.2,stage2_pct:1.1,stage3_pct:1.12,dpd30:1.8,dpd90:1.12,ecl_pct:1.42,credit_cost:0.28,disbursements:1820,disb_hl_mix:90,disb_lap_mix:7.2,disb_yield:13.8,disb_salaried:54,disb_cibil_750p:62,avg_ticket_disb:13.1,nim:5.82,spread:3.21,yield_adv:13.1,cof:9.89,roa:3.2,roe:14.8,pat:182,nii:298,cost_income:38.1,car:38.2,tier1:35.8,lcr:null,pbc_hl:71,total_borrowings:13950,incr_cob:9.12,avg_tenor_borrow:62,branches:372,employees:8900,coll_efficiency:99.1,digital_collection:76,growth_yoy:19},
+    {period:"Q2 FY25",aum:16820,hl_mix:87.8,lap_mix:8.4,cf_mix:null,affordable_mix:73,individual_mix:99.7,portfolio_yield:13.0,floating_mix:91,avg_tenor:16.0,salaried_mix:55,ltv_aum:52.5,bt_out:7.1,avg_ticket:12.1,gnpa:1.18,nnpa:0.64,gnpa_hl:1.04,gnpa_lap:2.55,stage1_pct:96.9,stage2_pct:1.2,stage3_pct:1.18,dpd30:1.9,dpd90:1.18,ecl_pct:1.48,credit_cost:0.30,disbursements:1620,disb_hl_mix:89,disb_lap_mix:7.8,disb_yield:13.5,disb_salaried:53,disb_cibil_750p:60,avg_ticket_disb:12.7,nim:5.76,spread:3.14,yield_adv:13.0,cof:9.86,roa:3.1,roe:14.2,pat:169,nii:278,cost_income:39.2,car:37.8,tier1:35.2,lcr:null,pbc_hl:70,total_borrowings:13100,incr_cob:9.22,avg_tenor_borrow:60,branches:362,employees:8600,coll_efficiency:98.9,digital_collection:73,growth_yoy:17},
+  ]},
+  {co:"Can Fin Homes",periods:["Q3 FY25","Q2 FY25"],data:[
+    {period:"Q3 FY25",aum:41200,hl_mix:97.8,lap_mix:2.2,cf_mix:null,affordable_mix:null,individual_mix:100,portfolio_yield:9.88,floating_mix:98,avg_tenor:18.4,salaried_mix:68,ltv_aum:46.2,bt_out:8.2,avg_ticket:24.8,gnpa:0.93,nnpa:0.48,gnpa_hl:0.88,gnpa_lap:null,stage1_pct:98.4,stage2_pct:0.67,stage3_pct:0.93,dpd30:1.4,dpd90:0.93,ecl_pct:0.82,credit_cost:0.18,disbursements:3240,disb_hl_mix:98,disb_lap_mix:2,disb_yield:10.2,disb_salaried:66,disb_cibil_750p:78,avg_ticket_disb:26.4,nim:3.58,spread:2.12,yield_adv:9.88,cof:7.76,roa:1.89,roe:17.2,pat:421,nii:598,cost_income:18.7,car:24.1,tier1:23.5,lcr:null,pbc_hl:84,total_borrowings:35400,incr_cob:7.88,avg_tenor_borrow:54,branches:223,employees:4100,coll_efficiency:99.4,digital_collection:82,growth_yoy:14},
+    {period:"Q2 FY25",aum:39800,hl_mix:97.6,lap_mix:2.4,cf_mix:null,affordable_mix:null,individual_mix:100,portfolio_yield:9.82,floating_mix:98,avg_tenor:18.2,salaried_mix:67,ltv_aum:46.8,bt_out:8.5,avg_ticket:24.2,gnpa:0.98,nnpa:0.51,gnpa_hl:0.94,gnpa_lap:null,stage1_pct:98.2,stage2_pct:0.8,stage3_pct:0.98,dpd30:1.5,dpd90:0.98,ecl_pct:0.86,credit_cost:0.20,disbursements:3010,disb_hl_mix:97,disb_lap_mix:3,disb_yield:10.0,disb_salaried:65,disb_cibil_750p:76,avg_ticket_disb:25.8,nim:3.52,spread:2.06,yield_adv:9.82,cof:7.76,roa:1.82,roe:16.8,pat:398,nii:572,cost_income:19.2,car:23.8,tier1:23.1,lcr:null,pbc_hl:83,total_borrowings:34100,incr_cob:7.92,avg_tenor_borrow:52,branches:220,employees:4000,coll_efficiency:99.3,digital_collection:80,growth_yoy:13.5},
+  ]},
+];
+function buildDemoExtractions(){
+  const out=[];
+  DEMO_RAW.forEach(co=>{
+    co.data.forEach(d=>{
+      const fields={};
+      FIELDS.forEach(f=>{const v=d[f.k]??null;fields[f.k]={value:v,u:f.u,conf:v!=null?"high":"not_found",src:v!=null?`${f.l}: ${v}${f.u?" "+f.u:""}`:null};});
+      out.push({id:`demo_${co.co}_${d.period}`.replace(/\s/g,"_"),company:co.co,period:d.period,doc_type:"investor_presentation",file_name:"demo.pdf",tokens:0,is_demo:true,notes:"Demo data — configure API key for real extraction.",created_at:new Date().toISOString(),data:{company_name:co.co,period_detected:d.period,notes:"Demo data",fields}});
+    });
+  });
+  return out;
+}
+const DEMO_EXTRACTIONS = buildDemoExtractions();
+
+/* ════════════════════════════════════════════════
+   STATE & STORAGE
+   ════════════════════════════════════════════════ */
+const LS_KEY = "hfc_v5_ext";
+const S = {
+  apiKey: localStorage.getItem("hfc_ak") || "",
+  sbUrl:  CONFIG.SUPABASE_URL || localStorage.getItem("hfc_sb_url") || "",
+  sbKey:  CONFIG.SUPABASE_KEY || localStorage.getItem("hfc_sb_key") || "",
+  extractions:[],
+  selFields: FIELDS.map(f=>f.k),
+  view:"dashboard",resIdx:0,
+  cmpPeriod:null,cmpCat:"all",
+  trendCo:null,
+  sbConnected:false,
+};
+let pendingFiles=[],pTimer=null;
+function loadLocal(){try{const r=localStorage.getItem(LS_KEY);if(r)S.extractions=JSON.parse(r);}catch(e){}}
+function saveLocal(){try{localStorage.setItem(LS_KEY,JSON.stringify(S.extractions));}catch(e){}}
+
+/* ════════════════════════════════════════════════
+   SUPABASE
+   ════════════════════════════════════════════════ */
+async function sbFetch(path,opts={}){
+  const r=await fetch(S.sbUrl+"/rest/v1"+path,{...opts,headers:{...{"Content-Type":"application/json",apikey:S.sbKey,Authorization:"Bearer "+S.sbKey},...(opts.headers||{})}});return r;}
+async function sbLoadAll(){if(!S.sbUrl||!S.sbKey)return;try{const r=await sbFetch("/hfc_extractions?order=created_at.desc");if(!r.ok)return;const rows=await r.json();if(Array.isArray(rows)&&rows.length){S.extractions=rows;saveLocal();}S.sbConnected=true;updateSyncUI("Connected","ok");}catch(e){updateSyncUI("Connection failed","err");}}
+async function sbInsert(ext){if(!S.sbUrl||!S.sbKey)return;try{const row={id:ext.id,company:ext.company,period:ext.period,doc_type:ext.doc_type,file_name:ext.file_name,tokens:ext.tokens,is_demo:ext.is_demo,notes:ext.notes||"",data:ext.data};const r=await sbFetch("/hfc_extractions",{method:"POST",headers:{Prefer:"return=minimal"},body:JSON.stringify(row)});toast(r.ok?"✓ Synced to Supabase":"⚠ Sync failed");}catch(e){toast("⚠ Sync error");}}
+async function sbDelete(id){if(!S.sbUrl||!S.sbKey)return;try{await sbFetch(`/hfc_extractions?id=eq.${id}`,{method:"DELETE"});}catch(e){}}
+async function testSb(url,key){try{const r=await fetch(url+"/rest/v1/hfc_extractions?limit=1",{headers:{apikey:key,Authorization:"Bearer "+key}});return r.ok;}catch(e){return false;}}
+function updateSyncUI(text,state){const el=$("SB_SYNC"),sb=$("SB_STATUS");if(el)el.innerHTML=`<span class="sync-dot sync-${state==="ok"?"ok":state==="err"?"err":"off"}"></span>${text}`;if(sb){sb.textContent=text;sb.className="bdg "+(state==="ok"?"bg":state==="err"?"br":"bs");}}
+
+/* ════════════════════════════════════════════════
+   NAV
+   ════════════════════════════════════════════════ */
+const TITLES={dashboard:"Dashboard",upload:"Upload & Extract",success:"Extraction Success",uploadkpi:"Manual KPI Entry",results:"Extracted Data",compare:"Compare Competitors",trends:"Trend Analysis",ask:"Ask Your Data",mycompany:"My Company vs Peers",alerts:"Red Flag Alerts",concall:"Concall Highlights",score:"Strategic Positioning Score",boardpack:"Board Pack Generator",settings:"Settings & Sync",guide:"Deployment Guide"};
+function go(v){
+  S.view=v;
+  document.querySelectorAll(".page").forEach(p=>p.classList.add("hidden"));
+  document.querySelectorAll(".nb[data-v]").forEach(b=>b.classList.remove("on"));
+  const pg=$("P_"+v);if(pg)pg.classList.remove("hidden");
+  const nb=document.querySelector(`.nb[data-v="${v}"]`);if(nb)nb.classList.add("on");
+  $("TB_TITLE").textContent=TITLES[v]||v;
+  if(v==="results")renderResults();
+  if(v==="compare"){S.cmpPeriod=null;renderCompare();}
+  if(v==="dashboard")renderDash();
+  if(v==="settings")renderSettings();
+  if(v==="trends")renderTrends();
+  if(v==="ask"){askHistory=[];$("ASK_HISTORY").innerHTML="";$("ASK_INPUT").value="";}
+  if(v==="score")renderScore();
+  if(v==="uploadkpi"){renderMKE();}
+  if(v==="success"){}
+  if(v==="boardpack"){
+    const sel=document.getElementById("BP_PER");
+    const periods=[...new Set(S.extractions.map(e=>e.period).filter(Boolean))].sort((a,b)=>b.localeCompare(a));
+    sel.innerHTML='<option value="">— Select period —</option>'+periods.map(p=>`<option value="${p}">${p}</option>`).join("");
+  }
+  if(v==="alerts"){document.getElementById("ALERTS_RESULT").innerHTML="";}
+  if(v==="mycompany"){document.getElementById("MC_RESULT").innerHTML="";}
+  if(v==="concall"){document.getElementById("CC_RESULT").innerHTML="";}
+  closeSidebar();
+}
+function $(id){return document.getElementById(id);}
+
+/* ════════════════════════════════════════════════
+   MOBILE SIDEBAR
+   ════════════════════════════════════════════════ */
+function toggleSidebar(){$("SIDEBAR").classList.toggle("open");$("SB_OV").classList.toggle("show");}
+function closeSidebar(){$("SIDEBAR").classList.remove("open");$("SB_OV").classList.remove("show");}
+
+/* ════════════════════════════════════════════════
+   DASHBOARD
+   ════════════════════════════════════════════════ */
+function renderDash(){
+  const ex=S.extractions;
+  const cos=[...new Set(ex.map(e=>e.company))].length;
+  const pers=[...new Set(ex.map(e=>e.period))].length;
+  const pts=ex.reduce((s,e)=>s+Object.values(e.data?.fields||{}).filter(f=>f.value!=null).length,0);
+  const tok=ex.reduce((s,e)=>s+(e.tokens||0),0);
+  $("SD_DOCS").textContent=ex.length||"—";$("SD_COS").textContent=cos||"—";$("SD_PER").textContent=pers||"—";$("SD_PTS").textContent=pts||"—";
+  $("D_DEMO_ALERT").style.display = S.apiKey ? "none" : "flex";
+  $("TB_SUB").textContent = S.apiKey
+    ? (S.sbConnected ? "🔄 Team sync active — all data shared" : "🔄 Connecting…")
+    : "Demo mode";
+  $("KEY_BTN").style.display = S.apiKey ? "none" : "";
+  const tbody=$("D_TBODY");tbody.innerHTML="";
+  ex.slice(0,10).forEach(e=>{
+    const f=e.data?.fields||{};
+    const tr=document.createElement("tr");
+    tr.innerHTML=`<td style="font-weight:500;color:var(--cream)">${e.company}${e.is_demo?'<span class="bdg bs" style="margin-left:5px;font-size:8px">demo</span>':''}</td><td><span class="bdg bb">${e.period||"—"}</span></td><td style="font-size:11px;color:var(--slate)">${(e.doc_type||"").replace(/_/g," ")}</td><td><span class="num">${fv(f.aum)}</span></td><td><span class="num">${fv(f.nim)}</span></td><td><span class="num">${fv(f.gnpa)}</span></td><td><span class="num">${fv(f.stage3_pct)}</span></td><td><span class="num">${fv(f.car)}</span></td><td><span class="num">${fv(f.pat)}</span></td><td><span class="num">${fv(f.roa)}</span></td><td><button class="icon-btn del" title="Delete" onclick="deleteExt('${e.id}')">🗑</button></td>`;
+    tbody.appendChild(tr);
+  });
+  // D_EMPTY is replaced by the always-visible quick upload card
+  if($("D_EMPTY"))$("D_EMPTY").classList.add("hidden");
+  $("D_TABLE").classList.toggle("hidden",ex.length===0);
+}
+function fv(fd){return fd?.value!=null?fd.value:`<span style='color:var(--bg5)'>—</span>`;}
+
+/* ════════════════════════════════════════════════
+   DELETE
+   ════════════════════════════════════════════════ */
+window.deleteExt=function(id){
+  if(!confirm("Delete this extraction?"))return;
+  S.extractions=S.extractions.filter(e=>e.id!==id);
+  saveLocal();sbDelete(id);
+  updateCnt();renderDash();if(S.view==="results")renderResults();
+  toast("Extraction deleted");
+};
+
+/* ════════════════════════════════════════════════
+   FIELD PICKER
+   ════════════════════════════════════════════════ */
+function renderPicker(){
+  const c=$("FPICKER");c.innerHTML="";
+  CATS.forEach(cat=>{
+    const sec=document.createElement("div");sec.style.marginBottom="16px";
+    const lbl=document.createElement("div");lbl.style.cssText="font-size:9.5px;color:var(--slate);text-transform:uppercase;letter-spacing:1px;margin-bottom:7px;font-weight:600";lbl.textContent=cat;sec.appendChild(lbl);
+    const grid=document.createElement("div");grid.style.cssText="display:grid;grid-template-columns:repeat(3,1fr);gap:5px";
+    FIELDS.filter(f=>f.c===cat).forEach(f=>{
+      const ch=document.createElement("div");ch.className="chip"+(S.selFields.includes(f.k)?" on":"");ch.dataset.k=f.k;
+      ch.innerHTML=`<div class="chk">${S.selFields.includes(f.k)?"✓":""}</div><span style="flex:1;font-size:11.5px">${f.l}</span>${f.u?`<span style="font-size:9px;color:var(--slate);flex-shrink:0">${f.u}</span>`:""}`;
+      ch.onclick=()=>{S.selFields.includes(f.k)?S.selFields=S.selFields.filter(k=>k!==f.k):S.selFields.push(f.k);renderPicker();$("SEL_CNT").textContent=S.selFields.length+" selected";};
+      grid.appendChild(ch);
+    });
+    sec.appendChild(grid);c.appendChild(sec);
+  });
+}
+
+/* ════════════════════════════════════════════════
+   EXTRACTION
+   ════════════════════════════════════════════════ */
+function buildPrompt(fields){
+  const dt=$("INP_DT")?.value||"financial document";const per=$("INP_PER")?.value||"";
+  return `You are a senior analyst specialising in Indian Housing Finance Companies (HFCs).
+Analyse this ${dt}${per?" for "+per:" (auto-detect reporting period)"}.
+Extract ALL fields below. Return ONLY a valid JSON object — no markdown, no preamble.
+Fields: ${JSON.stringify(fields.map(f=>({key:f.k,label:f.l,unit:f.u,category:f.c})))}
+JSON format: {"company_name":"...","period_detected":"Q3 FY25","notes":"...","fields":{"<key>":{"value":<number|string|null>,"u":"<unit>","conf":"high|medium|low|not_found","src":"<quote or null>"}}}
+Rules: numbers only (3.5 not "3.5%"); null+not_found if missing; high=direct, medium=derived, low=inferred; use vision for scanned pages. Return ONLY the JSON.`;}
+
+async function toB64(f){return new Promise((ok,fail)=>{const r=new FileReader();r.onload=()=>ok(r.result.split(",")[1]);r.onerror=fail;r.readAsDataURL(f);});}
+function setP(p,msg){$("PFILL").style.width=p+"%";$("PPCT").textContent=Math.round(p)+"%";if(msg)$("PMSG").textContent=msg;}
+function showProc(msg){$("POV").classList.add("show");setP(5,msg);}
+function hideProc(){$("POV").classList.remove("show");if(pTimer){clearInterval(pTimer);pTimer=null;}}
+function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
+
+function autoSelectModel(){
+  const dt=document.getElementById("INP_DT")?.value;
+  const mm=document.getElementById("INP_MODEL");
+  if(!mm)return;
+  if(dt==="annual_report"||dt==="credit_rating"){
+    mm.value="claude-opus-4-5";
+  } else {
+    mm.value="claude-sonnet-4-5";
+  }
+  updateModelHint();
+}
+
+function updateModelHint(){
+  const m=document.getElementById("INP_MODEL")?.value;
+  const hint=document.getElementById("MODEL_HINT");
+  if(!hint)return;
+  if(m==="claude-opus-4-5"){
+    hint.style.color="var(--amber)";
+    hint.textContent="🔬 Best for scanned/image PDFs & annual reports — higher accuracy, higher cost";
+  } else {
+    hint.style.color="var(--green)";
+    hint.textContent="⚡ Best for clean digital PDFs — fast and cost-effective";
+  }
+}
+
+async function runExtraction(){
+  const company=$("INP_CO").value.trim();
+  if(!pendingFiles.length){setAlert("U_ALERT","Please upload a PDF first.","ae");return;}
+  if(!company){setAlert("U_ALERT","Please enter the competitor company name.","ae");return;}
+  // Duplicate detection
+  const per=$("INP_PER").value.trim();
+  if(per){const dup=S.extractions.find(e=>e.company.toLowerCase()===company.toLowerCase()&&e.period===per);if(dup&&!confirm(`An extraction for ${company} · ${per} already exists. Overwrite?`))return;}
+  $("U_ALERT").innerHTML="";
+  const activeFields=[{k:"period",l:"Reporting Period",u:"",c:"Meta"},...FIELDS.filter(f=>S.selFields.includes(f.k))];
+  const notes=$("INP_NOTES")?.value.trim()||"";
+  showProc("Converting PDF…");setP(8);
+  try{
+    const file=pendingFiles[0];
+    if(!S.apiKey){
+      setP(30,"Demo mode…");await sleep(600);setP(85,"Structuring…");await sleep(400);setP(100);await sleep(100);hideProc();
+      const dr={company_name:company,period_detected:per||"Q3 FY25",notes:"Demo extraction — configure API key for real extraction.",fields:DEMO_EXTRACTIONS[0].data.fields};
+      addExt({company,file,data:dr,isDemo:true,tokens:0,notes});return;
+    }
+    const b64=await toB64(file);setP(20,"Sending to Claude…");
+    let p=22;pTimer=setInterval(()=>{if(p<88)p+=Math.random()*3;const msgs=[[0,"Claude is reading your PDF…"],[40,"Identifying tables…"],[60,"Extracting metrics…"],[78,"Structuring results…"]];const m=msgs.filter(x=>x[0]<=p).pop();setP(p,m?.[1]);},900);
+    const resp=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json","x-api-key":S.apiKey,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify({model:(document.getElementById("INP_MODEL")?.value||"claude-sonnet-4-5"),max_tokens:8192,messages:[{role:"user",content:[{type:"document",source:{type:"base64",media_type:"application/pdf",data:b64}},{type:"text",text:buildPrompt(activeFields)}]}]})});
+    clearInterval(pTimer);pTimer=null;
+    if(!resp.ok){const err=await resp.json().catch(()=>({}));throw new Error(err.error?.message||"API error "+resp.status);}
+    setP(96,"Parsing…");const data=await resp.json();
+    const raw=data.content[0].text;const clean=raw.replace(/```json\s*/g,"").replace(/```\s*/g,"").trim();
+    const parsed=JSON.parse(clean);const tokens=(data.usage?.input_tokens||0)+(data.usage?.output_tokens||0);
+    setP(100);await sleep(150);hideProc();addExt({company,file,data:parsed,isDemo:false,tokens,notes});
+  }catch(err){if(pTimer){clearInterval(pTimer);pTimer=null;}hideProc();setAlert("U_ALERT",err.message||"Extraction failed. Check API key in Settings.","ae");}
+}
+
+function addExt({company,file,data,isDemo,tokens,notes}){
+  const ext={id:Date.now().toString(),company:data.company_name||company,period:data.period_detected||$("INP_PER")?.value||"",doc_type:$("INP_DT")?.value||"investor_presentation",file_name:file.name,tokens,is_demo:isDemo,notes:notes||"",created_at:new Date().toISOString(),data};
+  S.extractions.unshift(ext);saveLocal();sbInsert(ext);updateCnt();
+  pendingFiles=[];$("FILE_LIST").innerHTML="";$("INP_NOTES").value="";
+  renderDash();
+  // Navigate to success page
+  showSuccess(ext, data);
+}
+
+function showSuccess(ext, data){
+  const found=Object.values(data.fields||{}).filter(f=>f.value!=null).length;
+  const notFound=FIELDS.length-found;
+  const confHigh=Object.values(data.fields||{}).filter(f=>f.conf==="high").length;
+  const confMed=Object.values(data.fields||{}).filter(f=>f.conf==="medium").length;
+
+  // Pick 6 key KPIs to show as highlights
+  const highlights=["aum","nim","gnpa","roa","car","disbursements"].map(k=>{
+    const f=data.fields?.[k];const field=FIELDS.find(ff=>ff.k===k);
+    return f?.value!=null?{label:field?.l||k,value:f.value,unit:field?.u||"",conf:f.conf}:null;
+  }).filter(Boolean);
+
+  const div=$("SUCCESS_CONTENT");
+  div.innerHTML=`
+    <div style="text-align:center;padding:32px 20px 24px">
+      <div style="font-size:52px;margin-bottom:12px">✅</div>
+      <div style="font-family:var(--display);font-size:26px;font-weight:700;color:var(--cream);margin-bottom:6px">Extraction Complete!</div>
+      <div style="font-size:14px;color:var(--slate)">${ext.company} &nbsp;·&nbsp; ${ext.period||"Period auto-detected"} &nbsp;·&nbsp; ${(ext.doc_type||"").replace(/_/g," ")}</div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:0 20px 20px">
+      <div style="background:var(--bg3);border-radius:10px;padding:16px;text-align:center">
+        <div style="font-size:28px;font-weight:700;font-family:var(--mono);color:var(--green)">${found}</div>
+        <div style="font-size:11px;color:var(--slate);margin-top:3px">Fields Found</div>
+      </div>
+      <div style="background:var(--bg3);border-radius:10px;padding:16px;text-align:center">
+        <div style="font-size:28px;font-weight:700;font-family:var(--mono);color:var(--gold)">${confHigh}</div>
+        <div style="font-size:11px;color:var(--slate);margin-top:3px">High Confidence</div>
+      </div>
+      <div style="background:var(--bg3);border-radius:10px;padding:16px;text-align:center">
+        <div style="font-size:28px;font-weight:700;font-family:var(--mono);color:${notFound>10?"var(--amber)":"var(--slate)"}">${notFound}</div>
+        <div style="font-size:11px;color:var(--slate);margin-top:3px">Not Found</div>
+      </div>
+    </div>
+
+    ${highlights.length?`
+    <div style="padding:0 20px 20px">
+      <div style="font-size:10px;font-weight:700;color:var(--slate);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:10px">Key Metrics Extracted</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+        ${highlights.map(h=>`<div style="background:var(--bg3);border-radius:8px;padding:12px 14px">
+          <div style="font-size:9.5px;color:var(--slate);text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px">${h.label}</div>
+          <div style="font-family:var(--mono);font-size:18px;font-weight:600;color:var(--cream)">${h.value}<span style="font-size:11px;color:var(--slate);margin-left:3px">${h.unit}</span></div>
+          <div style="font-size:9px;margin-top:3px;color:${h.conf==="high"?"var(--green)":h.conf==="medium"?"var(--amber)":"var(--slate)"}">${h.conf||"–"} confidence</div>
+        </div>`).join("")}
+      </div>
+    </div>`:""}
+
+    <div style="padding:0 20px 24px;display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn gold" style="flex:1;min-width:140px" onclick="go('results')">📊 View Full Data →</button>
+      <button class="btn out" style="flex:1;min-width:140px" onclick="go('compare')">⊞ Compare →</button>
+      <button class="btn out" style="flex:1;min-width:140px" onclick="go('upload')">↑ Upload Another</button>
+    </div>`;
+  go("success");
+}
+
+/* ════════════════════════════════════════════════
+   RESULTS
+   ════════════════════════════════════════════════ */
+let filteredExts = [];
+function filterResults(){
+  const q=($("SEARCH_IN")?.value||"").toLowerCase();
+  filteredExts=S.extractions.filter(e=>
+    !q||e.company.toLowerCase().includes(q)||
+    e.period.toLowerCase().includes(q)||
+    e.doc_type.toLowerCase().includes(q)||
+    (e.notes||"").toLowerCase().includes(q)
+  );
+  renderResultTabs();
+}
+function renderResults(){filterResults();}
+function renderResultTabs(){
+  const ex=filteredExts;const tabs=$("RES_TABS");const content=$("RES_CONTENT");
+  if(!S.extractions.length){tabs.innerHTML="";content.innerHTML='<div class="empty"><div class="ei">📊</div><div class="eh">No extractions yet</div><p class="ep">Upload competitor documents to see KPIs here</p></div>';return;}
+  if(!ex.length){tabs.innerHTML="";content.innerHTML='<div class="empty"><div class="ei">🔍</div><div class="eh">No matches</div><p class="ep">Try a different search term</p></div>';return;}
+  if(S.resIdx>=ex.length)S.resIdx=0;
+  tabs.innerHTML="";
+  ex.forEach((e,i)=>{const btn=document.createElement("button");btn.className="btn sm "+(S.resIdx===i?"gold":"out");btn.style.maxWidth="180px";btn.style.overflow="hidden";btn.style.textOverflow="ellipsis";btn.textContent=`${e.company} · ${e.period||"—"}${e.is_demo?" ⚠":""}`;btn.onclick=()=>{S.resIdx=i;renderResultTabs();};tabs.appendChild(btn);});
+  renderExtTable(content,ex[S.resIdx]);
+}
+
+function renderExtTable(container,ext){
+  const {data}=ext;if(!data?.fields){container.innerHTML='<div class="alert ae">No data available.</div>';return;}
+  const found=FIELDS.filter(f=>data.fields?.[f.k]?.value!=null).length;
+  const wrap=document.createElement("div");
+  wrap.innerHTML=`<div class="card"><div class="card-hd"><div><div style="font-family:var(--display);font-size:17px;color:var(--cream);font-weight:600">${data.company_name||ext.company}</div><div style="font-size:11px;color:var(--slate);margin-top:2px">${data.period_detected||ext.period||"—"} &nbsp;·&nbsp; ${(ext.doc_type||"").replace(/_/g," ")} &nbsp;·&nbsp; <span style="color:var(--green)">${found}/${FIELDS.length} fields found</span>${ext.is_demo?' &nbsp;·&nbsp; <span style="color:var(--amber)">Demo</span>':''}</div></div><div style="display:flex;gap:6px"><button class="btn out sm" onclick="exportCSV([S.extractions.find(e=>e.id==='${ext.id}')])">↓ CSV</button><button class="icon-btn del" title="Delete" onclick="deleteExt('${ext.id}')">🗑</button></div></div>${data.notes?`<div style="padding:9px 20px;background:rgba(91,156,246,.06);border-bottom:1px solid var(--edge);font-size:12px;color:#93BBFD">ℹ ${data.notes}</div>`:""}</div>`;
+  container.innerHTML="";container.appendChild(wrap);
+  if(ext.notes){const np=document.createElement("div");np.className="note-pill";np.style.marginBottom="12px";np.innerHTML=`<strong style="color:var(--purple)">📝 Analyst Notes:</strong> ${ext.notes}`;container.appendChild(np);}
+  // Category accordion
+  CATS.forEach(cat=>{
+    const catFields=FIELDS.filter(f=>f.c===cat);
+    const catFound=catFields.filter(f=>data.fields?.[f.k]?.value!=null).length;
+    const sec=document.createElement("div");sec.className="card";
+    sec.innerHTML=`<div class="card-hd" style="cursor:pointer" onclick="this.nextElementSibling.classList.toggle('hidden')"><div class="card-t">${cat}</div><span class="bdg ${catFound>0?catFound===catFields.length?"bg":"ba":"bs"}">${catFound}/${catFields.length}</span></div><div style="overflow-x:auto"><table class="tbl"><thead><tr><th>Metric</th><th>Value</th><th>Confidence</th><th>Source</th></tr></thead><tbody id="T_${ext.id}_${cat.replace(/[^a-z]/gi,'_')}"></tbody></table></div>`;
+    container.appendChild(sec);
+    const tb=sec.querySelector("tbody");
+    catFields.forEach(f=>{const fd=data.fields?.[f.k];const conf=fd?.conf||"not_found";const tr=document.createElement("tr");tr.innerHTML=`<td style="font-weight:500;color:var(--cream)">${f.l}${f.u?`<span class="unt">${f.u}</span>`:""}</td><td>${fd?.value!=null?`<span class="num">${fd.value}</span><span class="unt">${f.u}</span>`:`<span style="color:var(--bg5)">—</span>`}</td><td><span class="bdg ${cc(conf)}">${cl(conf)}</span></td><td>${fd?.src?`<span class="src" title="${fd.src}">${fd.src}</span>`:`<span style="color:var(--bg5);font-size:10.5px">Not found</span>`}</td>`;tb.appendChild(tr);});
+  });
+}
+
+/* ════════════════════════════════════════════════
+   COMPARE
+   ════════════════════════════════════════════════ */
+function renderCompare(){
+  const allEx=S.extractions.length>=2?S.extractions:DEMO_EXTRACTIONS;
+  const isDemo=S.extractions.length<2;
+  $("CMP_ALERT").innerHTML=isDemo?'<div class="alert ai"><span>ℹ</span><span>Showing demo data. Upload 2+ real documents to compare.</span></div>':"";
+
+  const periods=[...new Set(allEx.map(e=>e.period).filter(Boolean))].sort((a,b)=>b.localeCompare(a));
+  if(!S.cmpPeriod||!periods.includes(S.cmpPeriod))S.cmpPeriod=periods[0];
+
+  // Period pills
+  const pDiv=$("CMP_PERIODS");pDiv.innerHTML="";
+  periods.forEach(p=>{const btn=document.createElement("button");btn.className="pp"+(S.cmpPeriod===p?" on":"");btn.textContent=p;btn.onclick=()=>{S.cmpPeriod=p;renderCompare();};pDiv.appendChild(btn);});
+
+  // Get companies for this period (latest per company)
+  const exForPeriod=[];const seen=new Set();
+  allEx.filter(e=>e.period===S.cmpPeriod).forEach(e=>{if(!seen.has(e.company)){seen.add(e.company);exForPeriod.push(e);}});
+
+  // Category pills
+  const cats=["all",...CATS];
+  const catDiv=$("CMP_CATS");catDiv.innerHTML="";
+  cats.forEach(c=>{const btn=document.createElement("button");btn.className="pp"+(S.cmpCat===c?" on":"");btn.textContent=c==="all"?"All KPIs":c;btn.onclick=()=>{S.cmpCat=c;renderCompare();};catDiv.appendChild(btn);});
+
+  const showBench=document.getElementById("BENCH_TOGGLE")?.checked;
+  const showHeat=document.getElementById("HEAT_TOGGLE")?.checked;
+
+  // Radar charts
+  const radarDiv=$("CMP_RADAR_ROW");
+  if(exForPeriod.length>0){
+    radarDiv.innerHTML="";const radarWrap=document.createElement("div");radarWrap.className="radar-wrap";
+    exForPeriod.forEach(ext=>{const cvs=buildRadar(ext);radarWrap.appendChild(cvs);});
+    radarDiv.appendChild(radarWrap);
+  }else{radarDiv.innerHTML="";}
+
+  const fields=(S.cmpCat==="all"?FIELDS:FIELDS.filter(f=>f.c===S.cmpCat)).filter(f=>f.k!=="period");
+  const cols=exForPeriod.length+(showBench?1:0);
+  $("CMP_TITLE").textContent=`${S.cmpCat==="all"?"All KPIs":S.cmpCat} — ${S.cmpPeriod} — ${exForPeriod.length} companies`;
+
+  const body=$("CMP_BODY");body.innerHTML="";
+  if(!exForPeriod.length){body.innerHTML='<div class="empty"><div class="ei">📊</div><div class="eh">No data for this period</div><p class="ep">Upload documents with this reporting period.</p></div>';return;}
+
+  const gc=`220px repeat(${cols},1fr)`;
+  const wrap=document.createElement("div");wrap.className="cmp-wrap";wrap.style.gridTemplateColumns=gc;
+
+  // Header row
+  const h0=h("div","hdr","");h0.style.cssText="font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--slate);padding:10px 14px;background:var(--bg3);border-bottom:1px solid var(--edge)";h0.textContent="Metric";wrap.appendChild(h0);
+  exForPeriod.forEach(e=>{const d=h("div","hdr","");d.style.cssText="padding:10px 14px;background:var(--bg3);border-bottom:1px solid var(--edge);text-align:right";d.innerHTML=`<div style="font-size:12px;font-weight:600;color:var(--cream)">${e.company}</div><div style="font-size:9.5px;color:var(--slate);margin-top:2px">${e.period}${e.is_demo?'<span class="bdg bs" style="font-size:8px;margin-left:4px">demo</span>':''}</div>`;wrap.appendChild(d);});
+  if(showBench){const bh=h("div","hdr","");bh.style.cssText="padding:10px 14px;background:rgba(201,168,76,.06);border-bottom:1px solid rgba(201,168,76,.15);text-align:right;border-left:1px solid rgba(201,168,76,.15)";bh.innerHTML=`<div style="font-size:12px;font-weight:600;color:var(--gold)">★ Industry</div><div style="font-size:9.5px;color:var(--slate);margin-top:2px">HFC Median</div>`;wrap.appendChild(bh);}
+
+  // Data rows
+  fields.forEach(f=>{
+    const vals=exForPeriod.map(e=>{const fd=e.data?.fields?.[f.k];return typeof fd?.value==="number"?fd.value:null;});
+    const nums=vals.filter(v=>v!==null);const mx=nums.length?Math.max(...nums):null;const mn=nums.length?Math.min(...nums):null;
+    const best=LOB.has(f.k)?mn:mx;const worst=LOB.has(f.k)?mx:mn;
+    const bm=BENCH[f.k];
+
+    const mc=h("div","","");mc.style.cssText="padding:8px 14px;border-bottom:1px solid rgba(255,255,255,.04)";mc.innerHTML=`<div style="font-size:12.5px;font-weight:500;color:var(--cream)">${f.l}</div><div style="font-size:9.5px;color:var(--slate);margin-top:1px">${f.c}${f.u?" · "+f.u:""}</div>`;wrap.appendChild(mc);
+
+    vals.forEach((v,i)=>{
+      const iB=v!==null&&v===best&&nums.length>1;const iW=v!==null&&v===worst&&nums.length>1;
+      const conf=exForPeriod[i].data?.fields?.[f.k]?.conf;
+      const c=h("div","","");c.style.cssText="padding:8px 14px;border-bottom:1px solid rgba(255,255,255,.04);text-align:right;font-family:var(--mono);font-size:13px";
+      if(showHeat&&v!==null&&nums.length>1){
+        const rank=(nums.length===1)?0.5:LOB.has(f.k)?(v===mn?1:v===mx?0:(mn===mx?0.5:(mx-v)/(mx-mn))):(v===mx?1:v===mn?0:(mn===mx?0.5:(v-mn)/(mx-mn)));
+        c.classList.add(rank>=0.9?"hm-best":rank>=0.6?"hm-good":rank<=0.1?"hm-worst":rank<=0.35?"hm-bad":"hm-mid");
+      }
+      if(v===null){c.innerHTML=`<span style="color:var(--bg5)">—</span>`;}
+      else{const cls=iB?"color:var(--green);font-weight:600":iW?"color:var(--red)":"color:var(--cream)";c.innerHTML=`${iB?'<span style="color:var(--green);font-size:10px">▲ </span>':iW?'<span style="color:var(--red);font-size:10px">▼ </span>':''}<span style="${cls}">${v}</span><span class="unt">${f.u}</span>`;}
+      wrap.appendChild(c);
+    });
+
+    if(showBench){const bc=h("div","","");bc.style.cssText="padding:8px 14px;border-bottom:1px solid rgba(255,255,255,.04);text-align:right;font-family:var(--mono);font-size:13px;background:rgba(201,168,76,.04);border-left:1px solid rgba(201,168,76,.1)";bc.innerHTML=bm?`<span style="color:var(--gold)">${bm.value}</span><span class="unt">${f.u}</span>`:`<span style="color:var(--bg5)">—</span>`;wrap.appendChild(bc);}
+  });
+  body.appendChild(wrap);
+  $("CMP_CSV").onclick=()=>exportCSV(exForPeriod);
+}
+
+/* ════════════════════════════════════════════════
+   RADAR CHART (SVG)
+   ════════════════════════════════════════════════ */
+const RADAR_DIMS=[
+  {key:"roa",label:"RoA",positive:true,max:4},
+  {key:"nim",label:"NIM",positive:true,max:6},
+  {key:"gnpa",label:"GNPA (inv)",positive:false,max:5},
+  {key:"car",label:"CAR",positive:true,max:40},
+  {key:"growth_yoy",label:"Growth",positive:true,max:30},
+  {key:"coll_efficiency",label:"Collection",positive:true,max:100,base:96},
+];
+function buildRadar(ext){
+  const size=220,cx=110,cy=110,R=80,N=RADAR_DIMS.length;
+  const vals=RADAR_DIMS.map(d=>{const v=ext.data?.fields?.[d.key]?.value;if(v==null)return 0;const norm=d.base!=null?(v-d.base)/(d.max-d.base):v/d.max;return Math.min(1,Math.max(0,d.positive?norm:1-norm));});
+  const pts=vals.map((v,i)=>{const a=(i/N)*2*Math.PI-Math.PI/2;return[cx+R*v*Math.cos(a),cy+R*v*Math.sin(a)];});
+  const poly=pts.map(p=>p.join(",")).join(" ");
+  // grid
+  const levels=[0.33,0.67,1];const gridSvg=levels.map(l=>{const gp=RADAR_DIMS.map((_,i)=>{const a=(i/N)*2*Math.PI-Math.PI/2;return[cx+R*l*Math.cos(a),cy+R*l*Math.sin(a)].join(",");}).join(" ");return`<polygon points="${gp}" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="1"/>`;}).join("");
+  // spokes
+  const spokes=RADAR_DIMS.map((_,i)=>{const a=(i/N)*2*Math.PI-Math.PI/2;return`<line x1="${cx}" y1="${cy}" x2="${cx+R*Math.cos(a)}" y2="${cy+R*Math.sin(a)}" stroke="rgba(255,255,255,.06)" stroke-width="1"/>`;}).join("");
+  // labels
+  const labels=RADAR_DIMS.map((d,i)=>{const a=(i/N)*2*Math.PI-Math.PI/2;const lx=cx+(R+18)*Math.cos(a);const ly=cy+(R+18)*Math.sin(a);return`<text x="${lx}" y="${ly}" text-anchor="middle" dominant-baseline="middle" fill="rgba(122,139,176,.9)" font-size="9" font-family="IBM Plex Sans,sans-serif">${d.label}</text>`;}).join("");
+  const svg=`<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg">${gridSvg}${spokes}<polygon points="${poly}" fill="rgba(201,168,76,.15)" stroke="var(--gold)" stroke-width="1.5"/>${labels}</svg>`;
+  const card=document.createElement("div");card.style.cssText="background:var(--bg3);border:1px solid var(--edge);border-radius:10px;padding:14px;text-align:center";
+  card.innerHTML=`<div style="font-size:12px;font-weight:600;color:var(--cream);margin-bottom:4px">${ext.company}</div><div style="font-size:10px;color:var(--slate);margin-bottom:10px">${ext.period}</div>${svg}`;
+  return card;
+}
+function h(tag,cls,html){const e=document.createElement(tag);if(cls)e.className=cls;if(html)e.innerHTML=html;return e;}
+
+/* ════════════════════════════════════════════════
+   TRENDS
+   ════════════════════════════════════════════════ */
+const TREND_FIELDS=[
+  {k:"aum",l:"AUM",u:"Cr"},{k:"nim",l:"NIM",u:"%"},{k:"gnpa",l:"GNPA",u:"%"},{k:"stage3_pct",l:"Stage 3",u:"%"},
+  {k:"roa",l:"RoA",u:"%"},{k:"roe",l:"RoE",u:"%"},{k:"car",l:"CAR",u:"%"},{k:"cof",l:"CoF",u:"%"},
+  {k:"cost_income",l:"C/I",u:"%"},{k:"coll_efficiency",l:"Coll. Eff.",u:"%"},{k:"growth_yoy",l:"Growth YoY",u:"%"},
+  {k:"disbursements",l:"Disbursements",u:"Cr"},{k:"pat",l:"PAT",u:"Cr"},
+];
+function renderTrends(){
+  const exAll=S.extractions.length?S.extractions:DEMO_EXTRACTIONS;
+  const companies=[...new Set(exAll.map(e=>e.company))];
+  if(!S.trendCo||!companies.includes(S.trendCo))S.trendCo=companies[0];
+  const div=$("TREND_COS");div.innerHTML="";
+  companies.forEach(co=>{const btn=document.createElement("button");btn.className="pp"+(S.trendCo===co?" on":"");btn.textContent=co;btn.onclick=()=>{S.trendCo=co;renderTrends();};div.appendChild(btn);});
+  const coEx=exAll.filter(e=>e.company===S.trendCo).sort((a,b)=>a.period.localeCompare(b.period));
+  const content=$("TREND_CONTENT");content.innerHTML="";
+  if(coEx.length===0){content.innerHTML='<div class="empty"><div class="ei">📈</div><div class="eh">No data</div></div>';return;}
+  const periods=coEx.map(e=>e.period);
+  const card=document.createElement("div");card.className="trend-co-card";
+  card.innerHTML=`<div class="trend-co-hd"><div style="font-family:var(--display);font-size:17px;color:var(--cream);font-weight:600">${S.trendCo}</div><div style="font-size:10.5px;color:var(--slate)">${periods.join(" → ")} &nbsp;·&nbsp; ${coEx.length} period${coEx.length>1?"s":""} tracked${coEx[0]?.is_demo?' &nbsp;·&nbsp; <span style="color:var(--amber)">Demo</span>':''}</div></div><div class="trend-body"><table class="trend-tbl"><thead><tr><th style="text-align:left">KPI</th>${periods.map(p=>`<th>${p}</th>`).join("")}</tr></thead><tbody id="TREND_BODY"></tbody></table></div>`;
+  content.appendChild(card);
+  const tb=document.getElementById("TREND_BODY");
+  TREND_FIELDS.forEach(f=>{
+    const vals=coEx.map(e=>{const fd=e.data?.fields?.[f.k];return typeof fd?.value==="number"?fd.value:null;});
+    if(vals.every(v=>v===null))return;
+    const tr=document.createElement("tr");let cells="";
+    vals.forEach((v,i)=>{
+      if(v===null){cells+=`<td style="color:var(--bg5)">—</td>`;return;}
+      let delta="";if(i>0&&vals[i-1]!=null){const diff=v-vals[i-1];const pct=vals[i-1]!==0?((diff/Math.abs(vals[i-1]))*100).toFixed(1):null;const lob=LOB.has(f.k);const better=(lob&&diff<0)||(!lob&&diff>0);const worse=(lob&&diff>0)||(!lob&&diff<0);delta=pct!=null?`<span class="${better?"delta-up":worse?"delta-dn":"delta-fl"}">${diff>0?"+":""}${pct}%</span>`:"";} cells+=`<td><span class="num">${v}</span><span class="unt">${f.u}</span>${delta}</td>`;
+    });
+    tr.innerHTML=`<td>${f.l}${f.u?`<span style="font-size:9.5px;color:var(--slate);margin-left:3px">${f.u}</span>`:""}</td>${cells}`;
+    tb.appendChild(tr);
+  });
+}
+
+/* ════════════════════════════════════════════════
+   CSV EXPORT
+   ════════════════════════════════════════════════ */
+function exportCSV(exts){
+  if(!exts||!exts.length){alert("No data to export.");return;}
+  const rows=[["Company","Period","Document Type","Category","Metric","Value","Unit","Confidence","Source","Analyst Notes"]];
+  exts.forEach(ext=>{FIELDS.forEach(f=>{const fd=ext.data?.fields?.[f.k];rows.push([ext.company,ext.period||"",(ext.doc_type||"").replace(/_/g," "),f.c,f.l,fd?.value??"",f.u,fd?.conf||"not_found",(fd?.src||"").replace(/,/g," "),(ext.notes||"").replace(/,/g," ")]);});});
+  const csv=rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(",")).join("\n");
+  const a=document.createElement("a");a.href="data:text/csv;charset=utf-8,"+encodeURIComponent(csv);a.download="hfc_intelligence.csv";a.click();
+}
+
+/* ════════════════════════════════════════════════
+   SETTINGS
+   ════════════════════════════════════════════════ */
+function renderSettings(){
+  // Update usage stats
+  const tok = S.extractions.reduce((s,e)=>s+(e.tokens||0),0);
+  const cost = "₹"+(S.extractions.length?(tok/1000*0.015*85).toFixed(1):0);
+  const ub = $("USAGE_BADGE"); if(ub) ub.textContent = cost+" est.";
+  const ud = $("USAGE_DOCS"); if(ud) ud.textContent = S.extractions.filter(e=>!e.is_demo).length;
+  const uc = $("USAGE_COST"); if(uc) uc.textContent = cost;
+
+  const configured = S.apiKey && S.sbUrl && S.sbKey;
+  if(configured){
+    // Show read-only configured state — no inputs needed
+    const keyCard = $("SETTINGS_KEY_BODY");
+    const sbCard  = $("SETTINGS_SB_BODY");
+    if(keyCard) keyCard.innerHTML = `
+      <div class="alert ao"><span>✓</span><span><strong>Pre-configured by administrator.</strong> Claude API key is embedded in the app — no action needed.</span></div>
+      <div style="background:var(--bg3);border-radius:8px;padding:14px 16px;font-size:12.5px;color:var(--slate);line-height:1.8">
+        <div><strong style="color:var(--cream)">Model:</strong> claude-sonnet-4-5</div>
+        <div><strong style="color:var(--cream)">Status:</strong> <span style="color:var(--green)">● Active</span></div>
+        <div><strong style="color:var(--cream)">Cost:</strong> ~₹2–10 per PDF (charged to administrator's account)</div>
+      </div>`;
+    if(sbCard) sbCard.innerHTML = `
+      <div class="alert ao"><span>✓</span><span><strong>Pre-configured by administrator.</strong> Supabase sync is active — all extractions shared automatically.</span></div>
+      <div style="background:var(--bg3);border-radius:8px;padding:14px 16px;font-size:12.5px;color:var(--slate);line-height:1.8">
+        <div><strong style="color:var(--cream)">Project:</strong> ${CONFIG.SUPABASE_URL}</div>
+        <div><strong style="color:var(--cream)">Sync status:</strong> <span id="SETTINGS_SYNC_STATUS" style="color:var(--green)">● ${S.sbConnected?"Connected":"Connecting…"}</span></div>
+        <div><strong style="color:var(--cream)">Sharing:</strong> All team members see the same data in real time</div>
+      </div>`;
+    const ks = $("KEY_STATUS"); if(ks){ks.textContent="Active";ks.className="bdg bg";}
+    const ss = $("SB_STATUS");  if(ss){ss.textContent=S.sbConnected?"Connected":"Connecting";ss.className="bdg "+(S.sbConnected?"bg":"ba");}
+    return;
+  }
+  // Manual config (owner hasn't pre-filled CONFIG yet)
+  $("SET_KEY").value=S.apiKey||"";$("SET_SB_URL").value=S.sbUrl||"";$("SET_SB_KEY").value=S.sbKey||"";
+  $("KEY_STATUS").textContent=S.apiKey?"Set":"Not set";$("KEY_STATUS").className="bdg "+(S.apiKey?"bg":"bs");
+}
+
+/* ════════════════════════════════════════════════
+   FILE HANDLING
+   ════════════════════════════════════════════════ */
+const dz=$("DZ"),fi=$("FI");
+dz.addEventListener("dragover",e=>{e.preventDefault();dz.classList.add("drag");});
+dz.addEventListener("dragleave",()=>dz.classList.remove("drag"));
+dz.addEventListener("drop",e=>{e.preventDefault();dz.classList.remove("drag");handleFiles(e.dataTransfer.files);});
+fi.onchange=e=>handleFiles(e.target.files);
+function handleFiles(files){
+  const pdfs=Array.from(files).filter(f=>f.type==="application/pdf"||f.name.endsWith(".pdf"));
+  if(!pdfs.length){setAlert("U_ALERT","Only PDF files are supported.","ae");return;}
+  pendingFiles=[...pendingFiles,...pdfs];renderFileList();$("U_ALERT").innerHTML="";updateExtBtn();
+}
+function renderFileList(){
+  const list=$("FILE_LIST");list.innerHTML="";
+  pendingFiles.forEach((f,i)=>{const p=document.createElement("div");p.className="fpill";p.innerHTML=`<div style="font-size:22px">📄</div><div><div style="font-size:12.5px;font-weight:500;color:var(--cream)">${f.name}</div><div style="font-size:10.5px;color:var(--slate)">${(f.size/1024/1024).toFixed(2)} MB</div></div><button class="btn danger xs" style="margin-left:auto" onclick="rmPF(${i})">Remove</button>`;list.appendChild(p);});
+}
+window.rmPF=i=>{pendingFiles.splice(i,1);renderFileList();updateExtBtn();};
+function updateExtBtn(){const btn=$("EXTRACT_BTN");if(btn)btn.disabled=!pendingFiles.length||!$("INP_CO")?.value.trim();}
+
+/* ════════════════════════════════════════════════
+   UTILS
+   ════════════════════════════════════════════════ */
+function cc(c){return c==="high"?"bg":c==="medium"?"ba":c==="low"?"br":"bs";}
+function cl(c){return c==="high"?"High":c==="medium"?"Med":c==="low"?"Low":"—";}
+function setAlert(id,msg,cls){$(id).innerHTML=`<div class="alert ${cls}">${msg}</div>`;}
+function toast(msg){const el=$("SYNCBAR");el.textContent=msg;el.classList.add("show");setTimeout(()=>el.classList.remove("show"),3000);}
+function updateCnt(){const c=$("EXT_CNT");if(c){c.textContent=S.extractions.length;c.style.display=S.extractions.length?"":"none";}}
+
+/* ════════════════════════════════════════════════
+   EVENT WIRING
+   ════════════════════════════════════════════════ */
+$("OB_SAVE").onclick=()=>{
+  const k=$("OB_KEY").value.trim();const su=$("OB_SB_URL").value.trim();const sk=$("OB_SB_KEY").value.trim();
+  if(k){S.apiKey=k;localStorage.setItem("hfc_ak",k);}
+  if(su&&sk){S.sbUrl=su;S.sbKey=sk;localStorage.setItem("hfc_sb_url",su);localStorage.setItem("hfc_sb_key",sk);}
+  $("OV").style.display="none";if(su&&sk)sbLoadAll();renderDash();
+};
+$("OB_KEY").addEventListener("keydown",e=>{if(e.key==="Enter")$("OB_SAVE").click();});
+$("OB_SKIP").onclick=()=>{localStorage.setItem("hfc_seen","1");$("OV").style.display="none";};
+$("KEY_BTN").onclick=()=>go("settings");
+document.querySelectorAll(".nb[data-v]").forEach(btn=>btn.onclick=()=>go(btn.dataset.v));
+$("CSV_BTN").onclick=()=>exportCSV(S.extractions);
+$("SEL_ALL").onclick=()=>{S.selFields=FIELDS.map(f=>f.k);renderPicker();$("SEL_CNT").textContent=S.selFields.length+" selected";};
+$("SEL_NONE").onclick=()=>{S.selFields=[];renderPicker();$("SEL_CNT").textContent="0 selected";};
+$("EXTRACT_BTN").onclick=runExtraction;
+$("INP_CO").addEventListener("input",updateExtBtn);
+
+$("SET_KEY_SAVE").onclick=()=>{const k=$("SET_KEY").value.trim();S.apiKey=k;localStorage.setItem("hfc_ak",k||"");$("KEY_STATUS").textContent=k?"Set":"Not set";$("KEY_STATUS").className="bdg "+(k?"bg":"bs");$("KEY_BTN").textContent=k?"⚙ API Key":"+ API Key";$("U_NOTE").textContent=k?"🤖 claude-sonnet-4-5 · ~₹0.50–2/PDF":"⚡ Demo mode — add API key for real extraction";toast(k?"✓ API key saved":"API key cleared");renderDash();};
+$("SET_KEY_CLR").onclick=()=>{S.apiKey="";localStorage.removeItem("hfc_ak");$("SET_KEY").value="";$("KEY_STATUS").textContent="Not set";$("KEY_STATUS").className="bdg bs";renderDash();};
+$("SB_SAVE").onclick=async()=>{
+  const url=$("SET_SB_URL").value.trim();const key=$("SET_SB_KEY").value.trim();
+  if(!url||!key){toast("Enter both Supabase URL and key.");return;}
+  toast("Testing connection…");const ok=await testSb(url,key);
+  if(ok){S.sbUrl=url;S.sbKey=key;localStorage.setItem("hfc_sb_url",url);localStorage.setItem("hfc_sb_key",key);S.sbConnected=true;updateSyncUI("Connected","ok");await sbLoadAll();renderDash();toast("✓ Supabase connected — data syncing");}
+  else toast("⚠ Connection failed — check URL and key.");
+};
+$("SB_CLR").onclick=()=>{S.sbUrl="";S.sbKey="";S.sbConnected=false;localStorage.removeItem("hfc_sb_url");localStorage.removeItem("hfc_sb_key");updateSyncUI("Not configured","off");$("SET_SB_URL").value="";$("SET_SB_KEY").value="";};
+$("CLEAR_ALL").onclick=()=>{if(confirm("Clear all local extraction data? Cannot be undone.")){S.extractions=[];saveLocal();updateCnt();renderDash();toast("Local data cleared.");}};
+
+$("ASK_BTN").onclick = runAsk;
+
+// Alerts
+document.getElementById("ALERTS_BTN").onclick = runAlerts;
+document.getElementById("ALERTS_REFRESH").onclick = runAlerts;
+
+// Score
+document.getElementById("SCORE_BTN").onclick = runScore;
+
+// Board Pack
+document.getElementById("BP_BTN").onclick = runBoardPack;
+
+// My Company file wiring
+(function(){
+  const fi=document.getElementById("MC_FI");
+  const dz=document.getElementById("MC_DZ");
+  if(fi) fi.onchange=e=>{myCompanyFile=e.target.files[0];if(myCompanyFile){document.getElementById("MC_FILE").innerHTML=`<div class="fi-item"><span class="fi-ic">📄</span><div class="fi-info"><div class="fi-name">${myCompanyFile.name}</div><div class="fi-size">${(myCompanyFile.size/1048576).toFixed(2)} MB</div></div><button class="btn ghost xs" onclick="myCompanyFile=null;document.getElementById('MC_FILE').innerHTML='';document.getElementById('MC_BTN').disabled=true">Remove</button></div>`;checkMCReady();}};
+  if(dz){dz.onclick=()=>fi.click();dz.ondragover=e=>{e.preventDefault();dz.style.borderColor="var(--gold)";};dz.ondragleave=()=>{dz.style.borderColor="";};dz.ondrop=e=>{e.preventDefault();dz.style.borderColor="";const f=e.dataTransfer.files[0];if(f&&f.type==="application/pdf"){fi.files=e.dataTransfer.files;myCompanyFile=f;document.getElementById("MC_FILE").innerHTML=`<div class="fi-item"><span class="fi-ic">📄</span><div class="fi-info"><div class="fi-name">${f.name}</div><div class="fi-size">${(f.size/1048576).toFixed(2)} MB</div></div></div>`;checkMCReady();}};}
+  document.getElementById("MC_CO").oninput=checkMCReady;
+  document.getElementById("MC_PER").oninput=checkMCReady;
+})();
+
+function checkMCReady(){const co=document.getElementById("MC_CO").value.trim();const per=document.getElementById("MC_PER").value.trim();document.getElementById("MC_BTN").disabled=!(co&&per&&myCompanyFile);}
+document.getElementById("MC_BTN").onclick=runMyCompany;
+
+// Concall file wiring
+(function(){
+  const fi=document.getElementById("CC_FI");
+  const dz=document.getElementById("CC_DZ");
+  if(fi) fi.onchange=e=>{concallFile=e.target.files[0];if(concallFile){document.getElementById("CC_FILE").innerHTML=`<div class="fi-item"><span class="fi-ic">📄</span><div class="fi-info"><div class="fi-name">${concallFile.name}</div><div class="fi-size">${(concallFile.size/1048576).toFixed(2)} MB</div></div><button class="btn ghost xs" onclick="concallFile=null;document.getElementById('CC_FILE').innerHTML='';document.getElementById('CC_BTN').disabled=true">Remove</button></div>`;checkCCReady();}};
+  if(dz){dz.onclick=()=>fi.click();dz.ondragover=e=>{e.preventDefault();dz.style.borderColor="var(--gold)";};dz.ondragleave=()=>{dz.style.borderColor="";};dz.ondrop=e=>{e.preventDefault();dz.style.borderColor="";const f=e.dataTransfer.files[0];if(f&&f.type==="application/pdf"){fi.files=e.dataTransfer.files;concallFile=f;document.getElementById("CC_FILE").innerHTML=`<div class="fi-item"><span class="fi-ic">📄</span><div class="fi-info"><div class="fi-name">${f.name}</div><div class="fi-size">${(f.size/1048576).toFixed(2)} MB</div></div></div>`;checkCCReady();}};}
+  document.getElementById("CC_CO").oninput=checkCCReady;
+})();
+
+function checkCCReady(){const co=document.getElementById("CC_CO").value.trim();document.getElementById("CC_BTN").disabled=!(co&&concallFile);}
+document.getElementById("CC_BTN").onclick=runConcall;
+$("ASK_INPUT").addEventListener("keydown", e=>{ if(e.key==="Enter"&&(e.ctrlKey||e.metaKey)) runAsk(); });
+
+document.getElementById("MKE_SAVE_BTN").onclick = saveMKE;
+document.getElementById("MKE_WEB_BTN").onclick = runWebKPISearch;
+document.getElementById("MKE_PARSE_BTN").onclick = parseMKEPaste;
+
+// Keyboard shortcuts
+document.addEventListener("keydown",e=>{if(e.altKey){if(e.key==="u")go("upload");if(e.key==="c")go("compare");if(e.key==="r")go("results");if(e.key==="t")go("trends");}});
+
+/* ════════════════════════════════════════════════
+   ASK YOUR DATA
+   ════════════════════════════════════════════════ */
+let askHistory = [];
+
+function buildDataContext(){
+  const ex = S.extractions.length >= 1 ? S.extractions : DEMO_EXTRACTIONS;
+  const lines = [];
+  lines.push("You have access to the following HFC competitor extractions:");
+  lines.push("");
+  ex.forEach(e => {
+    if(e.is_demo && S.extractions.length > 0) return;
+    const f = e.data?.fields || {};
+    const vals = Object.entries(f)
+      .filter(([k,v]) => v?.value != null)
+      .map(([k,v]) => {
+        const field = FIELDS.find(ff=>ff.k===k);
+        return `${field?.l||k}: ${v.value}${field?.u?" "+field.u:""}`;
+      }).join(", ");
+    lines.push(`[${e.company} | ${e.period} | ${(e.doc_type||"").replace(/_/g," ")}]`);
+    lines.push(vals);
+    lines.push("");
+  });
+  return lines.join("\n");
+}
+
+async function runAsk(){
+  const q = $("ASK_INPUT").value.trim();
+  if(!q) return;
+  if(!S.apiKey){ toast("⚠ API key required"); return; }
+
+  // Show thinking
+  $("ASK_THINKING").classList.remove("hidden");
+  $("ASK_PROG").style.width = "20%";
+  $("ASK_STATUS").textContent = "Preparing data context…";
+  $("ASK_BTN").disabled = true;
+
+  const dataCtx = buildDataContext();
+  setTimeout(()=>{ $("ASK_PROG").style.width="50%"; $("ASK_STATUS").textContent="Sending to Claude…"; }, 400);
+
+  try{
+    const messages = [
+      ...askHistory,
+      { role:"user", content: askHistory.length === 0
+        ? `Here is my HFC competitor extracted data:\n\n${dataCtx}\n\n---\n\nQuestion: ${q}`
+        : q
+      }
+    ];
+
+    const resp = await fetch("https://api.anthropic.com/v1/messages",{
+      method:"POST",
+      headers:{"Content-Type":"application/json","x-api-key":S.apiKey,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
+      body:JSON.stringify({
+        model: "claude-sonnet-4-5",
+        max_tokens: 1024,
+        system: `You are a financial analyst assistant for an Indian Housing Finance Company. 
+You have been given structured KPI extraction data from multiple competitor HFCs.
+Answer questions clearly and concisely. 
+- When ranking, always show the full ranked list with values
+- Use ₹ for INR amounts, % for percentages  
+- If data is missing for a company/period, say so explicitly
+- Be direct — lead with the answer, then explain
+- Use bullet points for rankings and comparisons`,
+        messages
+      })
+    });
+
+    $("ASK_PROG").style.width = "90%";
+    $("ASK_STATUS").textContent = "Formatting answer…";
+
+    if(!resp.ok){ const e=await resp.json().catch(()=>({})); throw new Error(e.error?.message||"API error"); }
+    const data = await resp.json();
+    const answer = data.content[0].text;
+
+    // Update conversation history (keep last 6 turns to stay within context)
+    askHistory.push({role:"user", content: askHistory.length===0 ? `Here is my HFC competitor extracted data:\n\n${dataCtx}\n\nQuestion: ${q}` : q});
+    askHistory.push({role:"assistant", content: answer});
+    if(askHistory.length > 12) askHistory = askHistory.slice(-12);
+
+    // Render answer
+    renderAskAnswer(q, answer);
+    $("ASK_INPUT").value = "";
+
+  } catch(err){
+    renderAskAnswer(q, "⚠ Error: " + (err.message||"Unknown error"), true);
+  } finally {
+    $("ASK_THINKING").classList.add("hidden");
+    $("ASK_BTN").disabled = false;
+    $("ASK_PROG").style.width = "5%";
+  }
+}
+
+function renderAskAnswer(question, answer, isError=false){
+  const hist = $("ASK_HISTORY");
+  const wrap = document.createElement("div");
+  wrap.style.cssText = "margin-bottom:14px;animation:fu .28s ease both";
+
+  // Format answer — convert markdown-ish to HTML
+  const formatted = answer
+    .replace(/\*\*(.*?)\*\*/g, '<strong style="color:var(--cream)">$1</strong>')
+    .replace(/^(\d+)\.\s+/gm, '<span style="color:var(--gold);font-weight:600;font-family:var(--mono)">$1.</span> ')
+    .replace(/^[-•]\s+/gm, '<span style="color:var(--gold)">▸</span> ')
+    .replace(/\n/g, '<br/>')
+    .split('\n').join('<br/>');
+
+  const ansColor = isError ? "var(--red)" : "var(--slate)";
+  const borderExtra = isError ? "border-color:rgba(240,96,112,.3);" : "";
+  wrap.innerHTML =
+    '<div style="background:var(--bg3);border-radius:8px 8px 0 0;padding:10px 16px;border:1px solid var(--edge);border-bottom:none">' +
+    '<span style="font-size:11px;color:var(--slate);font-weight:600;text-transform:uppercase;letter-spacing:1px">You asked</span>' +
+    '<div style="font-size:13px;color:var(--cream);margin-top:4px;font-style:italic">&ldquo;' + question + '&rdquo;</div></div>' +
+    '<div style="background:var(--bg2);border-radius:0 0 8px 8px;padding:16px;border:1px solid var(--edge);' + borderExtra + '">' +
+    '<div style="font-size:13px;color:' + ansColor + ';line-height:1.8">' + formatted.split("\n").join("<br/>") + '</div>' +
+    '<div style="margin-top:10px;display:flex;gap:6px">' +
+    '<button class="btn ghost xs" onclick="followUp(this)" style="font-size:10.5px">&#x21A9; Follow up</button>' +
+    '<button class="btn ghost xs" onclick="this.closest(\'[data-wrap]\').remove()" style="font-size:10.5px">&#x2715; Dismiss</button>' +
+    '</div></div>';
+  wrap.setAttribute("data-wrap","1");
+  hist.insertBefore(wrap, hist.firstChild);
+}
+
+window.askSample = function(btn){ $("ASK_INPUT").value = btn.dataset.q; $("ASK_INPUT").focus(); };
+window.followUp = function(btn){ $("ASK_INPUT").value = ""; $("ASK_INPUT").focus(); $("ASK_INPUT").placeholder = "Ask a follow-up question…"; };
+
+/* ════════════════════════════════════════════════
+   MY COMPANY VS PEERS
+   ════════════════════════════════════════════════ */
+let myCompanyFile = null;
+const mcDz = document.getElementById ? null : null; // wired after DOM
+
+function renderMyCompany(){
+  const periods=[...new Set(S.extractions.map(e=>e.period).filter(Boolean))].sort((a,b)=>b.localeCompare(a));
+}
+
+async function runMyCompany(){
+  const co = document.getElementById("MC_CO").value.trim();
+  const per = document.getElementById("MC_PER").value.trim();
+  if(!co||!per||!myCompanyFile){setAlert("MC_ALERT","Please fill company name, period and upload a PDF.","ae");return;}
+  if(!S.apiKey){setAlert("MC_ALERT","API key required.","ae");return;}
+  document.getElementById("MC_BTN").disabled=true;
+  document.getElementById("MC_BTN").textContent="Extracting…";
+  try{
+    const b64=await toB64(myCompanyFile);
+    const activeFields=FIELDS.filter(f=>f.k!=="period");
+    const resp=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json","x-api-key":S.apiKey,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify({model:document.getElementById("INP_MODEL")?.value||"claude-sonnet-4-5",max_tokens:8192,messages:[{role:"user",content:[{type:"document",source:{type:"base64",media_type:"application/pdf",data:b64}},{type:"text",text:buildPrompt(activeFields)}]}]})});
+    if(!resp.ok)throw new Error("API error "+resp.status);
+    const data=await resp.json();
+    const raw=data.content[0].text;
+    const parsed=JSON.parse(raw.replace(/```json\s*/g,"").replace(/```\s*/g,"").trim());
+    // Add as extraction tagged as "my_company"
+    const ext={id:"my_"+Date.now(),company:co,period:per,doc_type:"my_company",file_name:myCompanyFile.name,tokens:(data.usage?.input_tokens||0)+(data.usage?.output_tokens||0),is_demo:false,notes:"My Company",created_at:new Date().toISOString(),data:parsed};
+    S.extractions.unshift(ext);saveLocal();sbInsert(ext);updateCnt();
+    // Render positioning vs peers for this period
+    renderMCResult(ext,per);
+  }catch(e){setAlert("MC_ALERT","Extraction failed: "+e.message,"ae");}
+  finally{document.getElementById("MC_BTN").disabled=false;document.getElementById("MC_BTN").textContent="🏢 Extract & Compare →";}
+}
+
+function renderMCResult(myExt,period){
+  const peers=S.extractions.filter(e=>e.period===period&&e.id!==myExt.id&&e.doc_type!=="my_company");
+  const allEx=[myExt,...peers];
+  const div=document.getElementById("MC_RESULT");div.innerHTML="";
+  const keyKPIs=["aum","nim","gnpa","roa","roe","car","growth_yoy","coll_efficiency","cost_income","disbursements","stage3_pct","cof"];
+  const card=document.createElement("div");card.className="card";
+  let rows="";
+  keyKPIs.forEach(k=>{
+    const field=FIELDS.find(f=>f.k===k);if(!field)return;
+    const vals=allEx.map(e=>({co:e.company,v:e.data?.fields?.[k]?.value,isMe:e.id===myExt.id})).filter(x=>x.v!=null);
+    if(!vals.length)return;
+    const sorted=[...vals].sort((a,b)=>LOB.has(k)?a.v-b.v:b.v-a.v);
+    const myRank=sorted.findIndex(x=>x.isMe)+1;
+    const rankColor=myRank===1?"var(--green)":myRank<=Math.ceil(sorted.length/2)?"var(--amber)":"var(--red)";
+    const myVal=vals.find(x=>x.isMe);
+    rows+=`<tr><td style="font-size:12.5px;color:var(--cream);font-weight:500">${field.l}</td><td><span class="num">${myVal?.v||"—"}</span><span class="unt">${field.u}</span></td><td style="font-family:var(--mono);font-weight:700;color:${rankColor}">#${myRank} of ${sorted.length}</td><td style="font-size:11px;color:var(--slate)">${sorted.map((x,i)=>`${i+1}. ${x.co} (${x.v}${field.u})`).join(" · ")}</td></tr>`;
+  });
+  card.innerHTML=`<div class="card-hd"><div class="card-t">${myExt.company} vs ${peers.length} peers — ${period}</div><span class="bdg bg">${peers.length} companies compared</span></div><div style="overflow-x:auto"><table class="tbl"><thead><tr><th>KPI</th><th>Your Value</th><th>Your Rank</th><th>Peer Rankings</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  div.appendChild(card);
+}
+
+/* ════════════════════════════════════════════════
+   RED FLAG ALERTS
+   ════════════════════════════════════════════════ */
+async function runAlerts(){
+  const ex=S.extractions.filter(e=>!e.is_demo);
+  if(ex.length<2){setAlert ? null:null;document.getElementById("ALERTS_RESULT").innerHTML='<div class="alert aw">⚠ Upload at least 2 competitor documents to generate alerts.</div>';return;}
+  if(!S.apiKey){document.getElementById("ALERTS_RESULT").innerHTML='<div class="alert ae">API key required.</div>';return;}
+  document.getElementById("ALERTS_THINKING").classList.remove("hidden");
+  document.getElementById("ALERTS_BTN").disabled=true;
+  document.getElementById("ALERTS_PROG").style.width="30%";
+  try{
+    const ctx=buildDataContext();
+    const prompt=`You are a senior HFC analyst. Analyse this competitor data and identify:
+1. RED FLAGS — deteriorating metrics, concerning trends, QoQ worsening (GNPA rising, NIM compressing, growth slowing, CAR declining, etc.)
+2. GREEN FLAGS — improving metrics, positive momentum, standout performance
+
+For each flag:
+- Company name
+- What the flag is (specific metric and value)
+- Why it matters strategically
+- Severity: HIGH / MEDIUM / LOW
+
+Data:
+${ctx}
+
+Respond in this exact JSON format (no markdown):
+{"red_flags":[{"company":"","metric":"","observation":"","implication":"","severity":"HIGH"}],"green_flags":[{"company":"","metric":"","observation":"","implication":"","severity":"HIGH"}]}`;
+
+    const resp=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json","x-api-key":S.apiKey,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify({model:"claude-sonnet-4-5",max_tokens:2048,messages:[{role:"user",content:prompt}]})});
+    document.getElementById("ALERTS_PROG").style.width="80%";
+    if(!resp.ok)throw new Error("API error");
+    const data=await resp.json();
+    const parsed=JSON.parse(data.content[0].text.replace(/```json\s*/g,"").replace(/```\s*/g,"").trim());
+    renderAlerts(parsed);
+    document.getElementById("ALERTS_REFRESH").style.display="";
+  }catch(e){document.getElementById("ALERTS_RESULT").innerHTML=`<div class="alert ae">Error: ${e.message}</div>`;}
+  finally{document.getElementById("ALERTS_THINKING").classList.add("hidden");document.getElementById("ALERTS_BTN").disabled=false;document.getElementById("ALERTS_PROG").style.width="5%";}
+}
+
+function renderAlerts(data){
+  const div=document.getElementById("ALERTS_RESULT");div.innerHTML="";
+  const sevColor={HIGH:"var(--red)",MEDIUM:"var(--amber)",LOW:"var(--slate)"};
+  const sevBdg={HIGH:"br",MEDIUM:"ba",LOW:"bs"};
+
+  if(data.red_flags?.length){
+    const sec=document.createElement("div");
+    sec.innerHTML=`<div style="font-size:11px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px">🚨 Red Flags (${data.red_flags.length})</div>`;
+    data.red_flags.forEach(f=>{
+      const card=document.createElement("div");card.className="card";card.style.marginBottom="10px";card.style.borderColor="rgba(240,96,112,.25)";
+      card.innerHTML=`<div class="card-bd" style="padding:14px 18px"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:8px"><div style="font-size:13px;font-weight:600;color:var(--cream)">${f.company} <span style="color:var(--red)">·</span> ${f.metric}</div><span class="bdg ${sevBdg[f.severity]||"br"}">${f.severity}</span></div><div style="font-size:12.5px;color:var(--slate);margin-bottom:6px">${f.observation}</div><div style="font-size:12px;color:var(--red);font-style:italic">⚠ ${f.implication}</div></div>`;
+      sec.appendChild(card);
+    });
+    div.appendChild(sec);
+  }
+
+  if(data.green_flags?.length){
+    const sec=document.createElement("div");sec.style.marginTop="20px";
+    sec.innerHTML=`<div style="font-size:11px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px">✅ Green Flags (${data.green_flags.length})</div>`;
+    data.green_flags.forEach(f=>{
+      const card=document.createElement("div");card.className="card";card.style.marginBottom="10px";card.style.borderColor="rgba(45,212,160,.2)";
+      card.innerHTML=`<div class="card-bd" style="padding:14px 18px"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:8px"><div style="font-size:13px;font-weight:600;color:var(--cream)">${f.company} <span style="color:var(--green)">·</span> ${f.metric}</div><span class="bdg ${sevBdg[f.severity]||"bg"}">${f.severity}</span></div><div style="font-size:12.5px;color:var(--slate);margin-bottom:6px">${f.observation}</div><div style="font-size:12px;color:var(--green);font-style:italic">✓ ${f.implication}</div></div>`;
+      sec.appendChild(card);
+    });
+    div.appendChild(sec);
+  }
+}
+
+/* ════════════════════════════════════════════════
+   CONCALL HIGHLIGHTS
+   ════════════════════════════════════════════════ */
+let concallFile = null;
+
+async function runConcall(){
+  const co=document.getElementById("CC_CO").value.trim();
+  const per=document.getElementById("CC_PER").value.trim();
+  if(!co||!concallFile){setAlert("CC_ALERT","Please enter company name and upload a transcript.","ae");return;}
+  if(!S.apiKey){setAlert("CC_ALERT","API key required.","ae");return;}
+  document.getElementById("CC_BTN").disabled=true;document.getElementById("CC_BTN").textContent="Extracting…";
+  try{
+    const b64=await toB64(concallFile);
+    const prompt=`You are a senior HFC analyst. Extract key highlights from this earnings call / concall transcript for ${co} ${per||""}.
+
+Extract and structure:
+1. Management Guidance — AUM growth target, NIM guidance, credit cost outlook, disbursement targets
+2. Key Management Quotes — verbatim impactful quotes (max 5)
+3. Asset Quality Commentary — any comments on GNPA, Stage 2/3, collections
+4. Growth Strategy — new segments, geographies, product focus
+5. Analyst Concerns — what analysts pushed back on or expressed concern about
+6. Positive Surprises — anything better than expected
+7. Watch Points — things to monitor next quarter
+
+Respond ONLY in JSON (no markdown):
+{"company":"","period":"","management_guidance":[""],"key_quotes":[{"speaker":"","quote":""}],"asset_quality":[""],"growth_strategy":[""],"analyst_concerns":[""],"positive_surprises":[""],"watch_points":[""]}`;
+
+    const resp=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json","x-api-key":S.apiKey,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify({model:"claude-sonnet-4-5",max_tokens:2048,messages:[{role:"user",content:[{type:"document",source:{type:"base64",media_type:"application/pdf",data:b64}},{type:"text",text:prompt}]}]})});
+    if(!resp.ok)throw new Error("API error "+resp.status);
+    const data=await resp.json();
+    const parsed=JSON.parse(data.content[0].text.replace(/```json\s*/g,"").replace(/```\s*/g,"").trim());
+    renderConcall(parsed,co,per);
+    setAlert("CC_ALERT","✓ Concall highlights extracted for "+co,"ao");
+  }catch(e){setAlert("CC_ALERT","Error: "+e.message,"ae");}
+  finally{document.getElementById("CC_BTN").disabled=false;document.getElementById("CC_BTN").textContent="🎙 Extract Highlights →";}
+}
+
+function renderConcall(d,co,per){
+  const div=document.getElementById("CC_RESULT");div.innerHTML="";
+  const sections=[
+    {key:"management_guidance",title:"📊 Management Guidance",color:"var(--blue)"},
+    {key:"asset_quality",title:"🏦 Asset Quality Commentary",color:"var(--amber)"},
+    {key:"growth_strategy",title:"🚀 Growth Strategy",color:"var(--green)"},
+    {key:"analyst_concerns",title:"⚠ Analyst Concerns",color:"var(--red)"},
+    {key:"positive_surprises",title:"✨ Positive Surprises",color:"var(--green)"},
+    {key:"watch_points",title:"👁 Watch Points Next Quarter",color:"var(--purple)"},
+  ];
+  const wrap=document.createElement("div");
+  wrap.innerHTML=`<div class="card" style="margin-bottom:14px"><div class="card-hd"><div style="font-family:var(--display);font-size:18px;color:var(--cream);font-weight:600">${d.company||co} ${d.period||per}</div></div></div>`;
+
+  if(d.key_quotes?.length){
+    const qc=document.createElement("div");qc.className="card";qc.style.marginBottom="14px";
+    qc.innerHTML=`<div class="card-hd"><div class="card-t">💬 Key Management Quotes</div></div><div class="card-bd">${d.key_quotes.map(q=>`<div style="border-left:3px solid var(--gold);padding:8px 14px;margin-bottom:10px;background:var(--bg3);border-radius:0 7px 7px 0"><div style="font-size:12.5px;color:var(--cream);font-style:italic;line-height:1.6">"${q.quote}"</div>${q.speaker?`<div style="font-size:10.5px;color:var(--gold);margin-top:4px;font-weight:600">— ${q.speaker}</div>`:""}</div>`).join("")}</div>`;
+    wrap.appendChild(qc);
+  }
+
+  sections.forEach(s=>{
+    if(!d[s.key]?.length)return;
+    const sc=document.createElement("div");sc.className="card";sc.style.marginBottom="10px";
+    sc.innerHTML=`<div class="card-hd"><div class="card-t" style="color:${s.color}">${s.title}</div></div><div class="card-bd"><ul style="list-style:none;padding:0;margin:0">${d[s.key].map(item=>`<li style="padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:12.5px;color:var(--slate);line-height:1.6"><span style="color:${s.color};margin-right:8px">▸</span>${item}</li>`).join("")}</ul></div>`;
+    wrap.appendChild(sc);
+  });
+  div.appendChild(wrap);
+}
+
+/* ════════════════════════════════════════════════
+   POSITIONING SCORE
+   ════════════════════════════════════════════════ */
+let scorePeriod = null;
+
+function renderScore(){
+  const periods=[...new Set(S.extractions.map(e=>e.period).filter(Boolean))].sort((a,b)=>b.localeCompare(a));
+  if(!scorePeriod&&periods.length)scorePeriod=periods[0];
+  const pDiv=document.getElementById("SCORE_PERIODS");pDiv.innerHTML="";
+  periods.forEach(p=>{const btn=document.createElement("button");btn.className="pp"+(scorePeriod===p?" on":"");btn.textContent=p;btn.onclick=()=>{scorePeriod=p;renderScore();};pDiv.appendChild(btn);});
+}
+
+async function runScore(){
+  const ex=(S.extractions.length?S.extractions:DEMO_EXTRACTIONS).filter(e=>e.period===scorePeriod);
+  if(!ex.length){document.getElementById("SCORE_RESULT").innerHTML='<div class="alert aw">No data for this period.</div>';return;}
+  if(!S.apiKey){document.getElementById("SCORE_RESULT").innerHTML='<div class="alert ae">API key required.</div>';return;}
+  document.getElementById("SCORE_THINKING").classList.remove("hidden");
+  document.getElementById("SCORE_BTN").disabled=true;
+  document.getElementById("SCORE_PROG").style.width="30%";
+  try{
+    const ctx=ex.map(e=>{const f=e.data?.fields||{};const vals=Object.entries(f).filter(([k,v])=>v?.value!=null).map(([k,v])=>{const fd=FIELDS.find(ff=>ff.k===k);return"  "+(fd?.l||k)+": "+v.value+(fd?.u?" "+fd.u:"");}).join("\n");return e.company+":\n"+vals;}).join("\n\n");
+
+    const prompt=`You are a senior HFC industry analyst. Score each company on a 0-100 scale across 6 strategic dimensions based on this data.
+
+Dimensions:
+1. Growth (AUM growth, disbursements, expansion)
+2. Profitability (NIM, RoA, RoE, spread, PAT)  
+3. Asset Quality (GNPA, NNPA, Stage 3, credit cost, collection efficiency)
+4. Capital Strength (CAR, Tier 1, LCR)
+5. Operational Efficiency (Cost-to-income, branches, employees)
+6. Franchise Quality (affordable mix, salaried mix, avg ticket, LTV)
+
+Data for ${scorePeriod}:
+${ctx}
+
+Respond ONLY in JSON (no markdown):
+{"period":"","companies":[{"name":"","scores":{"growth":0,"profitability":0,"asset_quality":0,"capital":0,"efficiency":0,"franchise":0},"total":0,"rank":1,"summary":"one sentence on their strategic position"}]}`;
+
+    const resp=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json","x-api-key":S.apiKey,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify({model:"claude-sonnet-4-5",max_tokens:2048,messages:[{role:"user",content:prompt}]})});
+    document.getElementById("SCORE_PROG").style.width="80%";
+    if(!resp.ok)throw new Error("API error");
+    const data=await resp.json();
+    const parsed=JSON.parse(data.content[0].text.replace(/```json\s*/g,"").replace(/```\s*/g,"").trim());
+    renderScoreResult(parsed);
+  }catch(e){document.getElementById("SCORE_RESULT").innerHTML=`<div class="alert ae">Error: ${e.message}</div>`;}
+  finally{document.getElementById("SCORE_THINKING").classList.add("hidden");document.getElementById("SCORE_BTN").disabled=false;document.getElementById("SCORE_PROG").style.width="5%";}
+}
+
+function renderScoreResult(data){
+  const div=document.getElementById("SCORE_RESULT");div.innerHTML="";
+  const sorted=[...data.companies].sort((a,b)=>b.total-a.total);
+  const dims=["growth","profitability","asset_quality","capital","efficiency","franchise"];
+  const dimLabels={growth:"Growth",profitability:"Profitability",asset_quality:"Asset Quality",capital:"Capital",efficiency:"Efficiency",franchise:"Franchise"};
+  const dimColors={growth:"var(--blue)",profitability:"var(--gold)",asset_quality:"var(--green)",capital:"var(--purple)",efficiency:"var(--amber)",franchise:"var(--cream)"};
+
+  const card=document.createElement("div");card.className="card";
+  let rows=sorted.map((co,i)=>{
+    const rankColor=i===0?"var(--green)":i===1?"var(--amber)":i===sorted.length-1?"var(--red)":"var(--slate)";
+    const dimCells=dims.map(d=>{const s=co.scores[d]||0;const w=s+"%";const c=s>=70?"var(--green)":s>=50?"var(--amber)":"var(--red)";return`<td style="text-align:center"><div style="font-family:var(--mono);font-size:12px;font-weight:600;color:${c}">${s}</div><div style="height:3px;background:var(--bg4);border-radius:2px;margin-top:3px"><div style="height:100%;width:${w};background:${c};border-radius:2px"></div></div></td>`;}).join("");
+    return`<tr><td style="font-weight:600;color:var(--cream)">${co.name}</td><td style="font-family:var(--mono);font-size:20px;font-weight:700;color:${rankColor}">${co.total}</td>${dimCells}<td style="font-size:11px;color:var(--slate);font-style:italic;max-width:200px">${co.summary}</td></tr>`;
+  }).join("");
+
+  card.innerHTML=`<div class="card-hd"><div class="card-t">Strategic Positioning Scores — ${data.period||scorePeriod}</div><span class="bdg bgold">${sorted.length} companies</span></div><div style="overflow-x:auto"><table class="tbl"><thead><tr><th>Company</th><th>Score /100</th>${dims.map(d=>`<th style="text-align:center;color:${dimColors[d]}">${dimLabels[d]}</th>`).join("")}<th>Positioning</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  div.appendChild(card);
+}
+
+/* ════════════════════════════════════════════════
+   BOARD PACK GENERATOR
+   ════════════════════════════════════════════════ */
+async function runBoardPack(){
+  const myCo=document.getElementById("BP_CO").value.trim();
+  const period=document.getElementById("BP_PER").value;
+  const tone=document.getElementById("BP_TONE").value;
+  if(!period){document.getElementById("BP_RESULT").innerHTML='<div class="alert aw">Please select a reporting period.</div>';return;}
+  if(!S.apiKey){document.getElementById("BP_RESULT").innerHTML='<div class="alert ae">API key required.</div>';return;}
+  document.getElementById("BP_THINKING").classList.remove("hidden");
+  document.getElementById("BP_BTN").disabled=true;
+  document.getElementById("BP_PROG").style.width="30%";
+  try{
+    const ex=(S.extractions.length?S.extractions:DEMO_EXTRACTIONS).filter(e=>e.period===period);
+    const ctx=ex.map(e=>{const f=e.data?.fields||{};const vals=Object.entries(f).filter(([k,v])=>v?.value!=null).map(([k,v])=>{const fd=FIELDS.find(ff=>ff.k===k);return"  "+(fd?.l||k)+": "+v.value+(fd?.u?" "+fd.u:"");}).join("\n");return e.company+":\n"+vals;}).join("\n\n");
+
+    const toneInstructions={
+      board:"Write in formal third-person board report style. Be concise — max 4 paragraphs. Use precise numbers.",
+      management:"Write in direct first-person management review style. Be action-oriented. Highlight gaps and opportunities.",
+      investor:"Write in investor-friendly tone. Emphasise strengths, growth trajectory, and competitive positioning."
+    };
+
+    const prompt=`You are a CFO preparing a competitor analysis section for a board pack.
+${myCo?`The client company is ${myCo}.`:""}
+${toneInstructions[tone]}
+
+Write a comprehensive competitive intelligence commentary for ${period} covering:
+1. Industry overview (2-3 sentences on sector trends)
+2. Peer group performance summary (highlight standouts)
+3. Key competitive dynamics (NIM compression/expansion, asset quality trends, growth leaders)
+4. ${myCo?"Our positioning vs peers — where we lead, where we lag":"Top performers and laggards"}
+5. Watch points for next quarter
+
+Then provide a "Key Numbers at a Glance" section with:
+- Best/worst GNPA in peer group
+- Best/worst NIM 
+- Fastest/slowest AUM growth
+- Best/worst RoA
+
+Peer data for ${period}:
+${ctx}
+
+Respond with the commentary as clean, formatted text (no JSON, use paragraphs and bullet points).`;
+
+    const resp=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json","x-api-key":S.apiKey,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify({model:"claude-sonnet-4-5",max_tokens:2048,messages:[{role:"user",content:prompt}]})});
+    document.getElementById("BP_PROG").style.width="80%";
+    if(!resp.ok)throw new Error("API error");
+    const data=await resp.json();
+    renderBoardPack(data.content[0].text,myCo,period,tone);
+  }catch(e){document.getElementById("BP_RESULT").innerHTML=`<div class="alert ae">Error: ${e.message}</div>`;}
+  finally{document.getElementById("BP_THINKING").classList.add("hidden");document.getElementById("BP_BTN").disabled=false;document.getElementById("BP_PROG").style.width="5%";}
+}
+
+function renderBoardPack(text,myCo,period,tone){
+  const div=document.getElementById("BP_RESULT");div.innerHTML="";
+  const formatted=text.replace(/\*\*(.*?)\*\*/g,"<strong>$1</strong>").split("\n").map(function(l){if(l.startsWith("- ")||l.startsWith("• "))return'<li style="margin-bottom:5px;color:var(--slate)">'+l.slice(2)+"</li>";if(/^\d+\./.test(l))return'<li style="margin-bottom:8px;color:var(--cream);font-weight:500">'+l+"</li>";return'<p style="margin-bottom:10px;color:var(--slate);line-height:1.8">'+l+"</p>";}).join("")
+  const card=document.createElement("div");card.className="card";
+  const toneLabel={board:"Board Pack",management:"Management Review",investor:"Investor Communication"};
+  card.innerHTML=`<div class="card-hd"><div><div style="font-family:var(--display);font-size:17px;color:var(--cream);font-weight:600">Competitor Intelligence Commentary</div><div style="font-size:11px;color:var(--slate);margin-top:2px">${period}${myCo?" · "+myCo:""} · ${toneLabel[tone]}</div></div><button class="btn out sm" onclick="copyBoardPack()">📋 Copy</button></div><div class="card-bd" id="BP_TEXT" style="font-size:13px;line-height:1.9">${formatted}</div>`;
+  div.appendChild(card);
+}
+window.copyBoardPack=function(){const t=document.getElementById("BP_TEXT");if(t){navigator.clipboard.writeText(t.innerText);toast("✓ Copied to clipboard");}};
+
+/* ════════════════════════════════════════════════
+   MANUAL KPI ENTRY
+   ════════════════════════════════════════════════ */
+let mkeValues = {};
+
+function renderMKE(){
+  mkeValues={};
+  // Category filter buttons
+  const catDiv=document.getElementById("MKE_CAT_FILTERS");
+  catDiv.innerHTML='<button class="pp on" data-cat="all" onclick="filterMKECat(this)">All</button>'+
+    CATS.map(c=>'<button class="pp" data-cat="'+c+'" onclick="filterMKECat(this)">'+c+'</button>').join("");
+
+  renderMKEFields("all","");
+  document.getElementById("MKE_SEARCH").oninput=function(){
+    const activeCat=document.querySelector("#MKE_CAT_FILTERS .pp.on")?.dataset.cat||"all";
+    renderMKEFields(activeCat,this.value.toLowerCase());
+  };
+}
+
+window.filterMKECat=function(btn){
+  document.querySelectorAll("#MKE_CAT_FILTERS .pp").forEach(b=>b.classList.remove("on"));
+  btn.classList.add("on");
+  const q=document.getElementById("MKE_SEARCH").value.toLowerCase();
+  renderMKEFields(btn.dataset.cat,q);
+};
+
+function renderMKEFields(cat,q){
+  const grid=document.getElementById("MKE_FIELDS_GRID");grid.innerHTML="";
+  const fields=FIELDS.filter(f=>f.k!=="period"&&(cat==="all"||f.c===cat)&&(!q||f.l.toLowerCase().includes(q)||f.k.includes(q)));
+  fields.forEach(f=>{
+    const existing=mkeValues[f.k]||"";
+    const wrap=document.createElement("div");
+    wrap.style.cssText="background:var(--bg3);border-radius:8px;padding:10px 12px;border:1px solid var(--edge)";
+    const inp2=document.createElement("input");
+    inp2.className="fi";
+    inp2.style.cssText="padding:5px 8px;font-size:13px;font-family:var(--mono)";
+    inp2.dataset.key=f.k;
+    inp2.placeholder="—";
+    inp2.value=existing||"";
+    inp2.oninput=function(){mkeValues[f.k]=this.value.trim()?(parseFloat(this.value)||this.value):undefined;};
+    const hdr=document.createElement("div");
+    hdr.style.cssText="font-size:9.5px;color:var(--slate);text-transform:uppercase;letter-spacing:.8px;margin-bottom:5px;display:flex;justify-content:space-between";
+    hdr.innerHTML="<span>"+f.l+"</span><span style='color:var(--bg5)'>"+f.u+"</span>";
+    wrap.appendChild(hdr);wrap.appendChild(inp2);
+    grid.appendChild(wrap);
+  });
+}
+
+function parseMKEPaste(){
+  const raw=document.getElementById("MKE_PASTE").value.trim();
+  if(!raw)return;
+  const lines=raw.split("\n");
+  let matched=0;
+  lines.forEach(line=>{
+    const parts=line.split(",").map(s=>s.trim());
+    if(parts.length<2)return;
+    const label=parts[0].toLowerCase();
+    const val=parseFloat(parts[1]);
+    if(isNaN(val))return;
+    // Try to match to a field
+    const field=FIELDS.find(f=>
+      f.l.toLowerCase()===label||
+      f.k.toLowerCase()===label||
+      f.l.toLowerCase().includes(label)||
+      label.includes(f.k.toLowerCase())
+    );
+    if(field){mkeValues[field.k]=val;matched++;}
+  });
+  // Re-render fields to show filled values
+  const activeCat=document.querySelector("#MKE_CAT_FILTERS .pp.on")?.dataset.cat||"all";
+  const q=document.getElementById("MKE_SEARCH").value.toLowerCase();
+  renderMKEFields(activeCat,q);
+  toast("✓ Matched "+matched+" KPIs from paste");
+}
+
+function saveMKE(){
+  const co=document.getElementById("MKE_CO").value.trim();
+  const per=document.getElementById("MKE_PER").value.trim();
+  const dt=document.getElementById("MKE_DT").value;
+  if(!co||!per){setAlert("MKE_ALERT","Company name and period are required.","ae");return;}
+
+  // Collect all input values fresh
+  document.querySelectorAll("#MKE_FIELDS_GRID input[data-key]").forEach(inp=>{
+    if(inp.value.trim()){const v=parseFloat(inp.value);mkeValues[inp.dataset.key]=isNaN(v)?inp.value.trim():v;}
+  });
+
+  const filledCount=Object.keys(mkeValues).filter(k=>mkeValues[k]!=null&&mkeValues[k]!=="").length;
+  if(!filledCount){setAlert("MKE_ALERT","Please enter at least one KPI value.","ae");return;}
+
+  // Build fields object matching extraction format
+  const fields={};
+  Object.entries(mkeValues).forEach(([k,v])=>{
+    if(v!=null&&v!=="")fields[k]={value:v,conf:"high",src:"Manual entry"};
+  });
+  fields["period"]={value:per,conf:"high",src:"Manual entry"};
+
+  const ext={
+    id:"mke_"+Date.now(),
+    company:co,
+    period:per,
+    doc_type:dt,
+    file_name:"Manual Entry",
+    tokens:0,
+    is_demo:false,
+    notes:"Manual KPI entry — "+filledCount+" fields",
+    created_at:new Date().toISOString(),
+    data:{company_name:co,period_detected:per,notes:"Manually entered data",fields}
+  };
+
+  S.extractions.unshift(ext);saveLocal();sbInsert(ext);updateCnt();renderDash();
+
+  // Show success
+  setAlert("MKE_ALERT","","");
+  showMKESuccess(co,per,filledCount);
+}
+
+function showMKESuccess(co,per,count){
+  const div=document.getElementById("MKE_ALERT");
+  div.innerHTML='<div class="card" style="margin-bottom:16px;border-color:rgba(45,212,160,.3)">' +
+    '<div class="card-bd" style="text-align:center;padding:28px 20px">' +
+    '<div style="font-size:40px;margin-bottom:10px">✅</div>' +
+    '<div style="font-family:var(--display);font-size:20px;font-weight:700;color:var(--cream);margin-bottom:6px">'+co+' · '+per+' saved!</div>' +
+    '<div style="font-size:13px;color:var(--slate);margin-bottom:18px">'+count+' KPIs added to your repository</div>' +
+    '<div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">' +
+    '<button class="btn gold" onclick="go(&quot;compare&quot;)">&#x229E; Compare Now &#x2192;</button>' +
+    '<button class="btn out" onclick="addAnotherMKE()">+ Add Another Period</button>' +
+    '<button class="btn out" onclick="go(&quot;results&quot;)">View Repository &#x2192;</button>' +
+    '</div></div></div>';
+}
+
+window.addAnotherMKE=function(){
+  document.getElementById("MKE_ALERT").innerHTML="";
+  document.getElementById("MKE_PER").value="";
+  mkeValues={};
+  renderMKEFields("all","");
+  document.getElementById("MKE_PER").focus();
+};
+
+window.clearMKE=function(){
+  mkeValues={};
+  document.getElementById("MKE_PASTE").value="";
+  renderMKEFields("all","");
+  toast("Fields cleared");
+};
+
+/* ════════════════════════════════════════════════
+   WEB KPI SEARCH
+   ════════════════════════════════════════════════ */
+async function runWebKPISearch(){
+  const co = document.getElementById("MKE_CO").value.trim();
+  const per = document.getElementById("MKE_PER").value.trim();
+  if(!co || !per){ toast("⚠ Enter company name and period first"); return; }
+  if(!S.apiKey){ toast("⚠ API key required"); return; }
+
+  const statusDiv = document.getElementById("MKE_WEB_STATUS");
+  const progBar = document.getElementById("MKE_WEB_PROG");
+  const msgDiv = document.getElementById("MKE_WEB_MSG");
+  const resultDiv = document.getElementById("MKE_WEB_RESULT");
+  const btn = document.getElementById("MKE_WEB_BTN");
+
+  statusDiv.classList.remove("hidden");
+  resultDiv.innerHTML = "";
+  btn.disabled = true;
+  progBar.style.width = "15%";
+  msgDiv.textContent = "Searching BSE, NSE, investor pages…";
+
+  const fieldList = FIELDS.filter(f=>f.k!=="period").map(f=>`${f.l} (${f.k}${f.u?", "+f.u:""})`).join(", ");
+
+  const prompt = `You are a financial research analyst. Search the web for the latest published financial KPIs for "${co}" for the period "${per}".
+
+Search for:
+1. "${co} ${per} quarterly results" 
+2. "${co} investor presentation ${per}"
+3. "${co} financial results BSE NSE"
+4. "${co} HFC results ${per} AUM NIM GNPA"
+
+Look for these specific KPIs: ${fieldList}
+
+Focus on genuine sources: BSE filings (bseindia.com), NSE (nseindia.com), company investor relations pages, CNBC TV18, Economic Times, Business Standard, Moneycontrol, The Hindu BusinessLine.
+
+Return a JSON object with whatever KPIs you can find with confidence levels:
+{
+  "company": "",
+  "period": "",
+  "source_urls": ["url1", "url2"],
+  "found_count": 0,
+  "disclaimer": "brief note on data reliability",
+  "fields": {
+    "aum": {"value": null, "unit": "INR Cr", "source": "source name", "conf": "high/medium/low"},
+    "nim": {"value": null, "unit": "%", "source": "", "conf": ""},
+    "gnpa": {"value": null, "unit": "%", "source": "", "conf": ""},
+    "nnpa": {"value": null, "unit": "%", "source": "", "conf": ""},
+    "roa": {"value": null, "unit": "%", "source": "", "conf": ""},
+    "roe": {"value": null, "unit": "%", "source": "", "conf": ""},
+    "car": {"value": null, "unit": "%", "source": "", "conf": ""},
+    "disbursements": {"value": null, "unit": "INR Cr", "source": "", "conf": ""},
+    "pat": {"value": null, "unit": "INR Cr", "source": "", "conf": ""},
+    "nii": {"value": null, "unit": "INR Cr", "source": "", "conf": ""},
+    "cof": {"value": null, "unit": "%", "source": "", "conf": ""},
+    "growth_yoy": {"value": null, "unit": "%", "source": "", "conf": ""},
+    "stage3_pct": {"value": null, "unit": "%", "source": "", "conf": ""},
+    "cost_income": {"value": null, "unit": "%", "source": "", "conf": ""},
+    "coll_efficiency": {"value": null, "unit": "%", "source": "", "conf": ""},
+    "branches": {"value": null, "unit": "", "source": "", "conf": ""},
+    "spread": {"value": null, "unit": "%", "source": "", "conf": ""},
+    "total_borrowings": {"value": null, "unit": "INR Cr", "source": "", "conf": ""},
+    "tier1": {"value": null, "unit": "%", "source": "", "conf": ""}
+  }
+}
+Only include fields where you actually found data. Set value to null for fields not found. Respond ONLY with JSON.`;
+
+  try {
+    progBar.style.width = "40%";
+    msgDiv.textContent = "Claude is searching the web…";
+
+    const resp = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": S.apiKey,
+        "anthropic-version": "2023-06-01",
+        "anthropic-dangerous-direct-browser-access": "true"
+      },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-5",
+        max_tokens: 2048,
+        tools: [{ type: "web_search_20250305", name: "web_search" }],
+        messages: [{ role: "user", content: prompt }]
+      })
+    });
+
+    progBar.style.width = "75%";
+    msgDiv.textContent = "Parsing results…";
+
+    if(!resp.ok){ const e=await resp.json().catch(()=>({})); throw new Error(e.error?.message||"API error "+resp.status); }
+    const data = await resp.json();
+
+    // Extract JSON from response (may be in text block after tool use)
+    let parsed = null;
+    for(const block of data.content){
+      if(block.type === "text" && block.text){
+        try{
+          const clean = block.text.replace(/```json\s*/g,"").replace(/```\s*/g,"").trim();
+          // Find JSON object in text
+          const jsonMatch = clean.match(/\{[\s\S]*\}/);
+          if(jsonMatch) parsed = JSON.parse(jsonMatch[0]);
+        }catch(e){}
+      }
+    }
+
+    progBar.style.width = "100%";
+
+    if(!parsed){ throw new Error("Could not parse search results. The company or period may not have public data available."); }
+
+    const found = Object.entries(parsed.fields||{}).filter(([k,v])=>v?.value!=null).length;
+    msgDiv.textContent = found+" KPIs found from web";
+
+    renderWebSearchResult(parsed, found);
+
+  } catch(err){
+    statusDiv.classList.add("hidden");
+    resultDiv.innerHTML = '<div class="alert ae" style="margin-top:10px">⚠ '+err.message+'</div>';
+  } finally {
+    btn.disabled = false;
+    setTimeout(()=>{ progBar.style.width="5%"; }, 1000);
+  }
+}
+
+function renderWebSearchResult(parsed, foundCount){
+  const resultDiv = document.getElementById("MKE_WEB_RESULT");
+  if(!foundCount){
+    resultDiv.innerHTML = '<div class="alert aw" style="margin-top:10px">⚠ No KPI data found on the web for this company and period. Try uploading a PDF instead.</div>';
+    return;
+  }
+
+  const confColor = {high:"var(--green)", medium:"var(--amber)", low:"var(--red)"};
+  const fields = Object.entries(parsed.fields||{}).filter(([k,v])=>v?.value!=null);
+
+  let html = '<div style="margin-top:12px">';
+  html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">';
+  html += '<div style="font-size:12px;color:var(--green);font-weight:600">✓ Found '+foundCount+' KPIs</div>';
+  html += '<button class="btn gold sm" onclick="applyWebResults()">⚡ Apply to Fields →</button></div>';
+
+  // Disclaimer
+  if(parsed.disclaimer){
+    html += '<div style="font-size:11px;color:var(--amber);background:rgba(251,191,36,.08);border-radius:6px;padding:8px 12px;margin-bottom:10px">⚠ '+parsed.disclaimer+'</div>';
+  }
+
+  // Sources
+  if(parsed.source_urls?.length){
+    html += '<div style="font-size:10.5px;color:var(--slate);margin-bottom:8px">Sources: '+parsed.source_urls.map(u=>'<a href="'+u+'" target="_blank" style="color:var(--blue);text-decoration:none">'+u.replace(/https?:\/\/(www\.)?/,"").split("/")[0]+'</a>').join(" · ")+'</div>';
+  }
+
+  // KPI chips
+  html += '<div style="display:flex;flex-wrap:wrap;gap:6px">';
+  fields.forEach(([k,v])=>{
+    const field = FIELDS.find(f=>f.k===k);
+    const c = confColor[v.conf]||"var(--slate)";
+    html += '<div style="background:var(--bg2);border:1px solid '+c+';border-radius:6px;padding:6px 10px;font-size:12px">';
+    html += '<span style="color:var(--slate)">'+(field?.l||k)+'</span> ';
+    html += '<span style="font-family:var(--mono);font-weight:600;color:var(--cream)">'+v.value+'</span>';
+    if(field?.u) html += '<span style="font-size:10px;color:var(--slate)"> '+field.u+'</span>';
+    html += '<span style="font-size:9px;color:'+c+';margin-left:5px">'+v.conf+'</span>';
+    html += '</div>';
+  });
+  html += '</div></div>';
+
+  // Store for apply
+  window._webSearchResults = parsed.fields;
+  resultDiv.innerHTML = html;
+}
+
+window.applyWebResults = function(){
+  if(!window._webSearchResults) return;
+  Object.entries(window._webSearchResults).forEach(([k,v])=>{
+    if(v?.value != null){
+      mkeValues[k] = v.value;
+    }
+  });
+  // Re-render fields to show populated values
+  const activeCat = document.querySelector("#MKE_CAT_FILTERS .pp.on")?.dataset.cat||"all";
+  const q = document.getElementById("MKE_SEARCH").value.toLowerCase();
+  renderMKEFields(activeCat, q);
+  toast("✓ "+Object.keys(window._webSearchResults).filter(k=>window._webSearchResults[k]?.value!=null).length+" KPIs applied to fields — review and save");
+  document.getElementById("MKE_WEB_RESULT").innerHTML = '<div class="alert ao" style="margin-top:8px">✓ Applied to fields below. Review values before saving.</div>';
+};
+
+/* ════════════════════════════════════════════════
+   INIT — fetches Claude key from Supabase config table
+   so the key is never stored in this HTML file
+   ════════════════════════════════════════════════ */
+async function fetchClaudeKeyFromSupabase(){
+  if(!S.sbUrl||!S.sbKey) return null;
+  try{
+    const r = await fetch(S.sbUrl+"/rest/v1/hfc_config?key=eq.claude_api_key&select=value&limit=1",{
+      headers:{apikey:S.sbKey, Authorization:"Bearer "+S.sbKey}
+    });
+    if(!r.ok) return null;
+    const rows = await r.json();
+    return rows?.[0]?.value || null;
+  }catch(e){ return null; }
+}
+
+(async function init(){
+  loadLocal(); updateCnt();
+  // Fetch Claude key from Supabase — never stored in HTML
+  if(S.sbUrl && S.sbKey){
+    updateSyncUI("Connecting…","off");
+    const remoteKey = await fetchClaudeKeyFromSupabase();
+    if(remoteKey){
+      S.apiKey = remoteKey;
+      localStorage.setItem("hfc_ak", remoteKey);
+    }
+    sbLoadAll();
+  }
+  // Skip onboarding if we have the key (from Supabase or localStorage)
+  $("OV").style.display = S.apiKey ? "none" : (localStorage.getItem("hfc_seen") ? "none" : "flex");
+  $("KEY_BTN").style.display = S.apiKey ? "none" : "";
+  renderDash(); renderPicker();
+  $("SEL_CNT").textContent = S.selFields.length+" selected";
+  $("U_NOTE").textContent = S.apiKey ? "🤖 claude-sonnet-4-5 · ~₹0.50–2 per PDF" : "⚡ Demo mode";
+  if(!S.sbUrl||!S.sbKey) updateSyncUI("Local only","off");
+})();
+</script>
+</body>
+</html>
