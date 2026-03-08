@@ -353,11 +353,28 @@ code{font-family:var(--mono);font-size:10.5px;background:var(--bg4);color:var(--
         <div class="stat"><div class="sl">Data Points</div><div class="sv" id="SD_PTS">—</div><div class="ss">extracted</div></div>
       </div>
       <div class="alert ai" id="D_DEMO_ALERT" style="display:none"><span>ℹ</span><span>Demo mode — add Claude API key in Settings. Free key at <strong>console.anthropic.com</strong></span></div>
+      <!-- Quick Upload Card — always visible -->
+      <div class="card" style="margin-bottom:14px;border:1.5px dashed rgba(246,197,85,.35);background:rgba(246,197,85,.03);cursor:pointer" onclick="go('upload')" id="D_QUICK_UPLOAD">
+        <div class="card-bd" style="padding:18px 20px">
+          <div style="display:flex;align-items:center;gap:14px">
+            <div style="width:44px;height:44px;border-radius:10px;background:rgba(246,197,85,.12);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">📥</div>
+            <div style="flex:1">
+              <div style="font-size:13.5px;font-weight:600;color:var(--cream);margin-bottom:3px">Upload a Competitor Document</div>
+              <div style="font-size:12px;color:var(--slate)">Investor deck · Quarterly results · Annual report · Scanned PDF — Claude extracts 48 KPIs instantly</div>
+            </div>
+            <div style="display:flex;gap:8px;flex-shrink:0">
+              <button class="btn gold sm" onclick="event.stopPropagation();go('upload')" style="white-space:nowrap">↑ Upload PDF</button>
+              <button class="btn out sm" onclick="event.stopPropagation();go('uploadkpi')" style="white-space:nowrap">✎ Manual Entry</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="card hidden" id="D_TABLE">
         <div class="card-hd"><div class="card-t">All Extractions</div><button class="btn out sm" onclick="go('results')">Manage →</button></div>
         <div style="overflow-x:auto"><table class="tbl"><thead><tr><th>Company</th><th>Period</th><th>Type</th><th>AUM (Cr)</th><th>NIM %</th><th>GNPA %</th><th>Stage 3 %</th><th>CAR %</th><th>PAT (Cr)</th><th>RoA %</th><th></th></tr></thead><tbody id="D_TBODY"></tbody></table></div>
       </div>
-      <div class="card" id="D_EMPTY"><div class="card-bd"><div class="empty"><div class="ei">📄</div><div class="eh">No documents yet</div><p class="ep">Upload your first competitor PDF to begin</p><button class="btn gold" onclick="go('upload')">↑ Upload First Document</button></div></div></div>
+      <div class="card hidden" id="D_EMPTY"><div class="card-bd"><div class="empty"><div class="ei">📄</div><div class="eh">No documents yet</div><p class="ep">Upload your first competitor PDF to begin</p><button class="btn gold" onclick="go('upload')">↑ Upload First Document</button></div></div></div>
     </div>
 
     <!-- ═══ UPLOAD ═══ -->
@@ -457,7 +474,7 @@ code{font-family:var(--mono);font-size:10.5px;background:var(--bg4);color:var(--
             <div class="fg"><label class="fl">Company Name *</label><input class="fi" id="MKE_CO" placeholder="e.g. ABHFL, PNB Housing, Tata Capital Housing"/></div>
             <div class="fg"><label class="fl">Reporting Period *</label><input class="fi" id="MKE_PER" placeholder="e.g. Q2 FY23, H1 FY24, FY2022"/></div>
           </div>
-          <div class="fg" style="margin-bottom:0">
+          <div class="fg" style="margin-bottom:12px">
             <label class="fl">Document Type</label>
             <select class="fi" id="MKE_DT">
               <option value="investor_presentation">Investor Presentation</option>
@@ -465,6 +482,20 @@ code{font-family:var(--mono);font-size:10.5px;background:var(--bg4);color:var(--
               <option value="annual_report">Annual Report</option>
               <option value="manual_entry">Manual Entry / Repository</option>
             </select>
+          </div>
+          <div style="background:var(--bg3);border-radius:10px;padding:14px 16px;border:1px solid var(--edge)">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+              <div>
+                <div style="font-size:13px;font-weight:600;color:var(--cream);margin-bottom:3px">🌐 Search Web for KPIs</div>
+                <div style="font-size:11.5px;color:var(--slate);line-height:1.5">Claude searches BSE filings, NSE, investor pages &amp; press releases.<br/>Best-effort — always verify before using.</div>
+              </div>
+              <button class="btn gold" id="MKE_WEB_BTN" style="white-space:nowrap;flex-shrink:0">🌐 Search &amp; Auto-Fill</button>
+            </div>
+            <div id="MKE_WEB_STATUS" class="hidden" style="margin-top:10px">
+              <div class="pb-bar"><div class="pb-f" id="MKE_WEB_PROG" style="width:10%"></div></div>
+              <div style="font-size:11.5px;color:var(--slate);margin-top:6px" id="MKE_WEB_MSG">Searching…</div>
+            </div>
+            <div id="MKE_WEB_RESULT"></div>
           </div>
         </div>
       </div>
@@ -1038,7 +1069,8 @@ function renderDash(){
     tr.innerHTML=`<td style="font-weight:500;color:var(--cream)">${e.company}${e.is_demo?'<span class="bdg bs" style="margin-left:5px;font-size:8px">demo</span>':''}</td><td><span class="bdg bb">${e.period||"—"}</span></td><td style="font-size:11px;color:var(--slate)">${(e.doc_type||"").replace(/_/g," ")}</td><td><span class="num">${fv(f.aum)}</span></td><td><span class="num">${fv(f.nim)}</span></td><td><span class="num">${fv(f.gnpa)}</span></td><td><span class="num">${fv(f.stage3_pct)}</span></td><td><span class="num">${fv(f.car)}</span></td><td><span class="num">${fv(f.pat)}</span></td><td><span class="num">${fv(f.roa)}</span></td><td><button class="icon-btn del" title="Delete" onclick="deleteExt('${e.id}')">🗑</button></td>`;
     tbody.appendChild(tr);
   });
-  $("D_EMPTY").classList.toggle("hidden",ex.length>0);
+  // D_EMPTY is replaced by the always-visible quick upload card
+  if($("D_EMPTY"))$("D_EMPTY").classList.add("hidden");
   $("D_TABLE").classList.toggle("hidden",ex.length===0);
 }
 function fv(fd){return fd?.value!=null?fd.value:`<span style='color:var(--bg5)'>—</span>`;}
@@ -1546,6 +1578,7 @@ document.getElementById("CC_BTN").onclick=runConcall;
 $("ASK_INPUT").addEventListener("keydown", e=>{ if(e.key==="Enter"&&(e.ctrlKey||e.metaKey)) runAsk(); });
 
 document.getElementById("MKE_SAVE_BTN").onclick = saveMKE;
+document.getElementById("MKE_WEB_BTN").onclick = runWebKPISearch;
 document.getElementById("MKE_PARSE_BTN").onclick = parseMKEPaste;
 
 // Keyboard shortcuts
@@ -2134,6 +2167,188 @@ window.clearMKE=function(){
   document.getElementById("MKE_PASTE").value="";
   renderMKEFields("all","");
   toast("Fields cleared");
+};
+
+/* ════════════════════════════════════════════════
+   WEB KPI SEARCH
+   ════════════════════════════════════════════════ */
+async function runWebKPISearch(){
+  const co = document.getElementById("MKE_CO").value.trim();
+  const per = document.getElementById("MKE_PER").value.trim();
+  if(!co || !per){ toast("⚠ Enter company name and period first"); return; }
+  if(!S.apiKey){ toast("⚠ API key required"); return; }
+
+  const statusDiv = document.getElementById("MKE_WEB_STATUS");
+  const progBar = document.getElementById("MKE_WEB_PROG");
+  const msgDiv = document.getElementById("MKE_WEB_MSG");
+  const resultDiv = document.getElementById("MKE_WEB_RESULT");
+  const btn = document.getElementById("MKE_WEB_BTN");
+
+  statusDiv.classList.remove("hidden");
+  resultDiv.innerHTML = "";
+  btn.disabled = true;
+  progBar.style.width = "15%";
+  msgDiv.textContent = "Searching BSE, NSE, investor pages…";
+
+  const fieldList = FIELDS.filter(f=>f.k!=="period").map(f=>`${f.l} (${f.k}${f.u?", "+f.u:""})`).join(", ");
+
+  const prompt = `You are a financial research analyst. Search the web for the latest published financial KPIs for "${co}" for the period "${per}".
+
+Search for:
+1. "${co} ${per} quarterly results" 
+2. "${co} investor presentation ${per}"
+3. "${co} financial results BSE NSE"
+4. "${co} HFC results ${per} AUM NIM GNPA"
+
+Look for these specific KPIs: ${fieldList}
+
+Focus on genuine sources: BSE filings (bseindia.com), NSE (nseindia.com), company investor relations pages, CNBC TV18, Economic Times, Business Standard, Moneycontrol, The Hindu BusinessLine.
+
+Return a JSON object with whatever KPIs you can find with confidence levels:
+{
+  "company": "",
+  "period": "",
+  "source_urls": ["url1", "url2"],
+  "found_count": 0,
+  "disclaimer": "brief note on data reliability",
+  "fields": {
+    "aum": {"value": null, "unit": "INR Cr", "source": "source name", "conf": "high/medium/low"},
+    "nim": {"value": null, "unit": "%", "source": "", "conf": ""},
+    "gnpa": {"value": null, "unit": "%", "source": "", "conf": ""},
+    "nnpa": {"value": null, "unit": "%", "source": "", "conf": ""},
+    "roa": {"value": null, "unit": "%", "source": "", "conf": ""},
+    "roe": {"value": null, "unit": "%", "source": "", "conf": ""},
+    "car": {"value": null, "unit": "%", "source": "", "conf": ""},
+    "disbursements": {"value": null, "unit": "INR Cr", "source": "", "conf": ""},
+    "pat": {"value": null, "unit": "INR Cr", "source": "", "conf": ""},
+    "nii": {"value": null, "unit": "INR Cr", "source": "", "conf": ""},
+    "cof": {"value": null, "unit": "%", "source": "", "conf": ""},
+    "growth_yoy": {"value": null, "unit": "%", "source": "", "conf": ""},
+    "stage3_pct": {"value": null, "unit": "%", "source": "", "conf": ""},
+    "cost_income": {"value": null, "unit": "%", "source": "", "conf": ""},
+    "coll_efficiency": {"value": null, "unit": "%", "source": "", "conf": ""},
+    "branches": {"value": null, "unit": "", "source": "", "conf": ""},
+    "spread": {"value": null, "unit": "%", "source": "", "conf": ""},
+    "total_borrowings": {"value": null, "unit": "INR Cr", "source": "", "conf": ""},
+    "tier1": {"value": null, "unit": "%", "source": "", "conf": ""}
+  }
+}
+Only include fields where you actually found data. Set value to null for fields not found. Respond ONLY with JSON.`;
+
+  try {
+    progBar.style.width = "40%";
+    msgDiv.textContent = "Claude is searching the web…";
+
+    const resp = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": S.apiKey,
+        "anthropic-version": "2023-06-01",
+        "anthropic-dangerous-direct-browser-access": "true"
+      },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-5",
+        max_tokens: 2048,
+        tools: [{ type: "web_search_20250305", name: "web_search" }],
+        messages: [{ role: "user", content: prompt }]
+      })
+    });
+
+    progBar.style.width = "75%";
+    msgDiv.textContent = "Parsing results…";
+
+    if(!resp.ok){ const e=await resp.json().catch(()=>({})); throw new Error(e.error?.message||"API error "+resp.status); }
+    const data = await resp.json();
+
+    // Extract JSON from response (may be in text block after tool use)
+    let parsed = null;
+    for(const block of data.content){
+      if(block.type === "text" && block.text){
+        try{
+          const clean = block.text.replace(/```json\s*/g,"").replace(/```\s*/g,"").trim();
+          // Find JSON object in text
+          const jsonMatch = clean.match(/\{[\s\S]*\}/);
+          if(jsonMatch) parsed = JSON.parse(jsonMatch[0]);
+        }catch(e){}
+      }
+    }
+
+    progBar.style.width = "100%";
+
+    if(!parsed){ throw new Error("Could not parse search results. The company or period may not have public data available."); }
+
+    const found = Object.entries(parsed.fields||{}).filter(([k,v])=>v?.value!=null).length;
+    msgDiv.textContent = found+" KPIs found from web";
+
+    renderWebSearchResult(parsed, found);
+
+  } catch(err){
+    statusDiv.classList.add("hidden");
+    resultDiv.innerHTML = '<div class="alert ae" style="margin-top:10px">⚠ '+err.message+'</div>';
+  } finally {
+    btn.disabled = false;
+    setTimeout(()=>{ progBar.style.width="5%"; }, 1000);
+  }
+}
+
+function renderWebSearchResult(parsed, foundCount){
+  const resultDiv = document.getElementById("MKE_WEB_RESULT");
+  if(!foundCount){
+    resultDiv.innerHTML = '<div class="alert aw" style="margin-top:10px">⚠ No KPI data found on the web for this company and period. Try uploading a PDF instead.</div>';
+    return;
+  }
+
+  const confColor = {high:"var(--green)", medium:"var(--amber)", low:"var(--red)"};
+  const fields = Object.entries(parsed.fields||{}).filter(([k,v])=>v?.value!=null);
+
+  let html = '<div style="margin-top:12px">';
+  html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">';
+  html += '<div style="font-size:12px;color:var(--green);font-weight:600">✓ Found '+foundCount+' KPIs</div>';
+  html += '<button class="btn gold sm" onclick="applyWebResults()">⚡ Apply to Fields →</button></div>';
+
+  // Disclaimer
+  if(parsed.disclaimer){
+    html += '<div style="font-size:11px;color:var(--amber);background:rgba(251,191,36,.08);border-radius:6px;padding:8px 12px;margin-bottom:10px">⚠ '+parsed.disclaimer+'</div>';
+  }
+
+  // Sources
+  if(parsed.source_urls?.length){
+    html += '<div style="font-size:10.5px;color:var(--slate);margin-bottom:8px">Sources: '+parsed.source_urls.map(u=>'<a href="'+u+'" target="_blank" style="color:var(--blue);text-decoration:none">'+u.replace(/https?:\/\/(www\.)?/,"").split("/")[0]+'</a>').join(" · ")+'</div>';
+  }
+
+  // KPI chips
+  html += '<div style="display:flex;flex-wrap:wrap;gap:6px">';
+  fields.forEach(([k,v])=>{
+    const field = FIELDS.find(f=>f.k===k);
+    const c = confColor[v.conf]||"var(--slate)";
+    html += '<div style="background:var(--bg2);border:1px solid '+c+';border-radius:6px;padding:6px 10px;font-size:12px">';
+    html += '<span style="color:var(--slate)">'+(field?.l||k)+'</span> ';
+    html += '<span style="font-family:var(--mono);font-weight:600;color:var(--cream)">'+v.value+'</span>';
+    if(field?.u) html += '<span style="font-size:10px;color:var(--slate)"> '+field.u+'</span>';
+    html += '<span style="font-size:9px;color:'+c+';margin-left:5px">'+v.conf+'</span>';
+    html += '</div>';
+  });
+  html += '</div></div>';
+
+  // Store for apply
+  window._webSearchResults = parsed.fields;
+  resultDiv.innerHTML = html;
+}
+
+window.applyWebResults = function(){
+  if(!window._webSearchResults) return;
+  Object.entries(window._webSearchResults).forEach(([k,v])=>{
+    if(v?.value != null){
+      mkeValues[k] = v.value;
+    }
+  });
+  // Re-render fields to show populated values
+  const activeCat = document.querySelector("#MKE_CAT_FILTERS .pp.on")?.dataset.cat||"all";
+  const q = document.getElementById("MKE_SEARCH").value.toLowerCase();
+  renderMKEFields(activeCat, q);
+  toast("✓ "+Object.keys(window._webSearchResults).filter(k=>window._webSearchResults[k]?.value!=null).length+" KPIs applied to fields — review and save");
+  document.getElementById("MKE_WEB_RESULT").innerHTML = '<div class="alert ao" style="margin-top:8px">✓ Applied to fields below. Review values before saving.</div>';
 };
 
 /* ════════════════════════════════════════════════
